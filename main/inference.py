@@ -7,6 +7,7 @@ Este módulo usa el modelo (objeto DiscreteBayesianNetwork) generado por
 
 import pickle
 from pgmpy.inference import VariableElimination
+from graph_builder import build_and_fit_model
 
 
 def load_model(path: str):
@@ -28,14 +29,9 @@ def query_model(model, variables, evidence= None):
 
 
 if __name__ == "__main__":
-    import os
-    from graph_builder import build_and_fit_model
 
-    model_path = "model.pkl"
-    if os.path.exists(model_path):
-        model = load_model(model_path)
-    else:
-        model, _ = build_and_fit_model(csv_path="eleven_nodes/tv_bn_dataset.csv", save_model_path=model_path, visualize=False)
+    model_path = "main/outputs/model.pkl"
+    model = load_model(model_path)
 
     evidence = {"EdadUsuario": "mayor", "Hora": "noche", "DiaSemana": "fin_semana", "DuracionPrograma": "media", "PopularidadPrograma": "alta", "InteresPrevio": "entretenimiento"}
     res = query_model(model, variables=["GeneroPrograma"], evidence=evidence)
