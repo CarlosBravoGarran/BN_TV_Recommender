@@ -1,20 +1,25 @@
-from openai import OpenAI
-import os
 import json
+import os
+import logging
 from datetime import datetime
-
 from pathlib import Path
+
 from dotenv import load_dotenv
+from openai import OpenAI
 
 from bn_recommender import recomendar_generos_bn
 
-import logging
+# Logging
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
+# Cargar .env
 env_path = ".env"
 load_dotenv(env_path)
 
+# Inicializar cliente OpenAI
 api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise RuntimeError("OPENAI_API_KEY not defined in .env file")
 
 client = OpenAI(api_key=api_key)
 
