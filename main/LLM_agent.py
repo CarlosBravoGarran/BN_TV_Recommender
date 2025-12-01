@@ -8,7 +8,10 @@ from dotenv import load_dotenv
 
 from bn_recommender import recomendar_generos_bn
 
-env_path = Path(__file__).parent / ".env"
+import logging
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
+env_path = ".env"
 load_dotenv(env_path)
 
 api_key = os.getenv("OPENAI_API_KEY")
@@ -52,6 +55,49 @@ NUNCA respondas fuera del JSON.
 9. Es muy importante que recojas el feedback del usuario para ver si ha aceptado o rechazado la recomendación previa.
 """
 
+EXTRACTION_PROMPT = """
+Eres un modelo extractor. Debes devolver UNICAMENTE un JSON válido con los siguientes campos.
+Si no puedes inferir alguno, usa null.
+
+Campos:
+{
+ "GeneroUsuario": ...,
+ "EdadUsuario": ...,
+ "DuracionPrograma": ...,
+ "TipoEmision": ...,
+ "InteresPrevio": ...,
+ "GeneroPrograma": ...,
+ "PopularidadPrograma": ...,
+ "Satisfaccion": ...,
+ "Recomendado": ...
+}
+
+Reglas:
+- No añadas texto antes ni después del JSON.
+- No incluyas explicaciones.
+- No uses markdown.
+- Para la hora y día coge el los actuales si no se mencionan.
+- La edad clasifícala en rangos: joven (18-35), adulto (36-55), mayor (56+).
+- Duración del programa en minutos: corto (<30), medio (30-60), largo (60+)
+- Si indican el tipo de programa (serie, película, documental, etc) úsalo para la duración del programa.
+"""
+
+def extraer_atributos_llm(mensaje_usuario: str) -> dict:
+
+    respuesta = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": EXTRACTION_PROMPT},
+            {"role": "user", "content": mensaje_usuario}
+        ],
+        temperature=0
+    )
+
+    crudo = respuesta.choices[0].message.content.strip()
+    atributos = json.loads(crudo)
+    return atributos
+
+
 def conversar(mensaje_usuario, state, historial=None):
     if historial is None:
         historial = []
@@ -74,17 +120,15 @@ def conversar(mensaje_usuario, state, historial=None):
     return content
 
 
-
-
-
 if __name__ == "__main__":
     historial = []
+
+    states_log = []
 
     state = {
         "context": {
             "hour": datetime.now().hour,
             "day": datetime.now().strftime("%A"),
-            "genre_probable": None 
         },
         "candidates": [],
         "last_recommendation": None,
@@ -96,6 +140,17 @@ if __name__ == "__main__":
 
     while True:
         mensaje = input("Usuario: ")
+
+        atributos = extraer_atributos_llm(mensaje)
+
+        # print("\nJSON extraído para inferencia BN:")
+        # print(json.dumps(atributos, indent=2, ensure_ascii=False))
+        # print("\n(Solo estamos probando esta parte, aún no se pasa a la BN)\n")
+
+        state["context"]["atributos_bn"] = atributos
+
+        states_log.append(json.loads(json.dumps(state)))
+
 
         if mensaje.lower().strip() == "salir":
             break
@@ -130,4 +185,11 @@ if __name__ == "__main__":
                 "item": item,
                 "feedback": state["user_feedback"]
             })
-    print(state["interaction_history"])
+    
+    # Guardar todos los STATES en un archivo JSON
+    save_path = Path(__file__).parent / "states.json"
+
+    with open(save_path, "w", encoding="utf-8") as f:
+        json.dump(states_log, f, indent=2, ensure_ascii=False)
+
+    print(f"Todos los STATES guardados en states.json")
