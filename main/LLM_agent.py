@@ -124,10 +124,9 @@ def conversar(mensaje_usuario, state, historial=None):
     content = respuesta.choices[0].message.content
     return content
 
-
 if __name__ == "__main__":
+    
     historial = []
-
     states_log = []
 
     state = {
