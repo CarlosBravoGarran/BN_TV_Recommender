@@ -87,22 +87,6 @@ Reglas:
 - Si indican el tipo de programa (serie, película, documental, etc) úsalo para la duración del programa.
 """
 
-def extraer_atributos_llm(mensaje_usuario: str) -> dict:
-
-    respuesta = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": EXTRACTION_PROMPT},
-            {"role": "user", "content": mensaje_usuario}
-        ],
-        temperature=0
-    )
-
-    crudo = respuesta.choices[0].message.content.strip()
-    atributos = json.loads(crudo)
-    return atributos
-
-
 def conversar(mensaje_usuario, state, historial=None):
     if historial is None:
         historial = []
@@ -123,6 +107,24 @@ def conversar(mensaje_usuario, state, historial=None):
 
     content = respuesta.choices[0].message.content
     return content
+
+
+def extraer_atributos_llm(mensaje_usuario: str) -> dict:
+
+    respuesta = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": EXTRACTION_PROMPT},
+            {"role": "user", "content": mensaje_usuario}
+        ],
+        temperature=0
+    )
+
+    crudo = respuesta.choices[0].message.content.strip()
+    atributos = json.loads(crudo)
+    return atributos
+
+
 
 if __name__ == "__main__":
     
@@ -146,11 +148,6 @@ if __name__ == "__main__":
         mensaje = input("Usuario: ")
 
         atributos = extraer_atributos_llm(mensaje)
-
-        # print("\nJSON extraído para inferencia BN:")
-        # print(json.dumps(atributos, indent=2, ensure_ascii=False))
-        # print("\n(Solo estamos probando esta parte, aún no se pasa a la BN)\n")
-
         state["context"]["atributos_bn"] = atributos
 
         states_log.append(json.loads(json.dumps(state)))
