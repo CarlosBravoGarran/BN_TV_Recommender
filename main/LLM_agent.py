@@ -66,6 +66,8 @@ Si no puedes inferir alguno, usa null.
 
 Campos:
 {
+ "Hora": ...,
+ "Día": ...,
  "GeneroUsuario": ...,
  "EdadUsuario": ...,
  "DuracionPrograma": ...,
@@ -85,6 +87,9 @@ Reglas:
 - La edad clasifícala en rangos: joven (18-35), adulto (36-55), mayor (56+).
 - Duración del programa en minutos: corto (<30), medio (30-60), largo (60+)
 - Si indican el tipo de programa (serie, película, documental, etc) úsalo para la duración del programa.
+- GéneroUsuario: "hombre" o "mujer"
+- Hora: "mañana", "tarde", "noche"
+- Día: "laboral" o "fin_semana"
 """
 
 def conversar(mensaje_usuario, state, historial=None):
@@ -124,7 +129,25 @@ def extraer_atributos_llm(mensaje_usuario: str) -> dict:
     atributos = json.loads(crudo)
     return atributos
 
+def recomendar_por_genero(state: dict) -> dict:
+    """
+    Devuelve un diccionario con solo los atributos_bn de state que no sean nulos.
+    Soporta state donde atributos_bn está en state['context']['atributos_bn'] o en state['atributos_bn'].
+    """
+    attrs = {}
+    if isinstance(state.get("context"), dict) and "atributos_bn" in state["context"]:
+        attrs = state["context"].get("atributos_bn") or {}
+    else:
+        attrs = state.get("atributos_bn") or {}
 
+    def _es_nulo(v):
+        return v is None or (isinstance(v, str) and v.strip().lower() in ("null", ""))
+
+    filtrados = {k: v for k, v in attrs.items() if not _es_nulo(v)}
+
+    print("Atributos no nulos para el recomendador BN:", filtrados)
+
+    return filtrados
 
 if __name__ == "__main__":
     
@@ -186,6 +209,7 @@ if __name__ == "__main__":
                 "item": item,
                 "feedback": state["user_feedback"]
             })
+        recomendar_por_genero(state)
     
     # Guardar todos los STATES en un archivo JSON
     save_path = Path(__file__).parent / "states.json"

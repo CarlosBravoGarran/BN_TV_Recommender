@@ -1,0 +1,48 @@
+[
+  {
+    "context": {
+      "hour": 20,
+      "day": "Saturday",
+      "atributos_bn": {
+        "Hora": "noche",
+        "Día": "laboral",
+        "GeneroUsuario": "hombre",
+        "EdadUsuario": "joven",
+        "DuracionPrograma": "largo",
+        "TipoEmision": "película",
+        "InteresPrevio": null,
+        "GeneroPrograma": "miedo",
+        "PopularidadPrograma": null,
+        "Satisfaccion": null,
+        "Recomendado": null
+      }
+    },
+    "candidates": [],
+    "last_recommendation": null,
+    "user_feedback": null,
+    "interaction_history": []
+  },
+  {
+    "context": {
+      "hour": 20,
+      "day": "Saturday",
+      "atributos_bn": {
+        "Hora": null,
+        "Día": null,
+        "GeneroUsuario": null,
+        "EdadUsuario": null,
+        "DuracionPrograma": null,
+        "TipoEmision": null,
+        "InteresPrevio": null,
+        "GeneroPrograma": null,
+        "PopularidadPrograma": null,
+        "Satisfaccion": null,
+        "Recomendado": null
+      }
+    },
+    "candidates": [],
+    "last_recommendation": null,
+    "user_feedback": null,
+    "interaction_history": []
+  }
+]
