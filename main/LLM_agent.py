@@ -67,7 +67,7 @@ Si no puedes inferir alguno, usa null.
 Campos:
 {
  "Hora": ...,
- "Día": ...,
+ "DiaSemana": ...,
  "GeneroUsuario": ...,
  "EdadUsuario": ...,
  "DuracionPrograma": ...,
@@ -85,11 +85,12 @@ Reglas:
 - No uses markdown.
 - Para la hora y día coge el los actuales si no se mencionan.
 - La edad clasifícala en rangos: joven (18-35), adulto (36-55), mayor (56+).
-- Duración del programa en minutos: corto (<30), medio (30-60), largo (60+)
+- Duración del programa en minutos: corta (<30), media (30-60), larga (60+)
 - Si indican el tipo de programa (serie, película, documental, etc) úsalo para la duración del programa.
 - GéneroUsuario: "hombre" o "mujer"
 - Hora: "mañana", "tarde", "noche"
 - Día: "laboral" o "fin_semana"
+- TipoEmision: "bajo_demanda", "diferido", "directo"
 """
 
 def conversar(mensaje_usuario, state, historial=None):
@@ -149,6 +150,25 @@ def recomendar_por_genero(state: dict) -> dict:
 
     return filtrados
 
+def inferir_con_bn(state: dict) -> list:
+    """
+    Filtra los atributos no nulos y ejecuta la BN.
+    Devuelve una lista ordenada de géneros recomendados.
+    """
+    attrs = recomendar_por_genero(state)
+
+    if not attrs:
+        print("No hay atributos suficientes para inferencia BN.")
+        return []
+
+    recomendaciones = recomendar_generos_bn(attrs)
+
+    ordenados = [g for g, _ in recomendaciones]
+
+    print("Recomendaciones BN (ordenadas):", ordenados)
+    return ordenados
+
+
 if __name__ == "__main__":
     
     historial = []
@@ -172,6 +192,10 @@ if __name__ == "__main__":
 
         atributos = extraer_atributos_llm(mensaje)
         state["context"]["atributos_bn"] = atributos
+
+        # INFERENCIA BN → candidatos ordenados
+        state["candidates"] = inferir_con_bn(state)
+
 
         states_log.append(json.loads(json.dumps(state)))
 
@@ -209,7 +233,6 @@ if __name__ == "__main__":
                 "item": item,
                 "feedback": state["user_feedback"]
             })
-        recomendar_por_genero(state)
     
     # Guardar todos los STATES en un archivo JSON
     save_path = Path(__file__).parent / "states.json"

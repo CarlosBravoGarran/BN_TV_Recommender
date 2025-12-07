@@ -1,34 +1,38 @@
 [
   {
     "context": {
-      "hour": 20,
-      "day": "Saturday",
+      "hour": 10,
+      "day": "Sunday",
       "atributos_bn": {
         "Hora": "noche",
-        "Día": "laboral",
+        "DiaSemana": "laboral",
         "GeneroUsuario": "hombre",
         "EdadUsuario": "joven",
-        "DuracionPrograma": "largo",
-        "TipoEmision": "película",
+        "DuracionPrograma": "larga",
+        "TipoEmision": null,
         "InteresPrevio": null,
-        "GeneroPrograma": "miedo",
+        "GeneroPrograma": null,
         "PopularidadPrograma": null,
         "Satisfaccion": null,
         "Recomendado": null
       }
     },
-    "candidates": [],
+    "candidates": [
+      "película",
+      "entretenimiento",
+      "noticias"
+    ],
     "last_recommendation": null,
     "user_feedback": null,
     "interaction_history": []
   },
   {
     "context": {
-      "hour": 20,
-      "day": "Saturday",
+      "hour": 10,
+      "day": "Sunday",
       "atributos_bn": {
         "Hora": null,
-        "Día": null,
+        "DiaSemana": null,
         "GeneroUsuario": null,
         "EdadUsuario": null,
         "DuracionPrograma": null,
@@ -41,8 +45,41 @@
       }
     },
     "candidates": [],
-    "last_recommendation": null,
+    "last_recommendation": "película",
     "user_feedback": null,
-    "interaction_history": []
+    "interaction_history": [
+      {
+        "item": "película",
+        "feedback": null
+      }
+    ]
+  },
+  {
+    "context": {
+      "hour": 10,
+      "day": "Sunday",
+      "atributos_bn": {
+        "Hora": null,
+        "DiaSemana": null,
+        "GeneroUsuario": null,
+        "EdadUsuario": null,
+        "DuracionPrograma": null,
+        "TipoEmision": null,
+        "InteresPrevio": null,
+        "GeneroPrograma": null,
+        "PopularidadPrograma": null,
+        "Satisfaccion": null,
+        "Recomendado": null
+      }
+    },
+    "candidates": [],
+    "last_recommendation": "película",
+    "user_feedback": "rejected",
+    "interaction_history": [
+      {
+        "item": "película",
+        "feedback": null
+      }
+    ]
   }
 ]

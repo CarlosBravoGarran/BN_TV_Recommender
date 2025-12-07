@@ -2,17 +2,23 @@ from inference import load_model, query_model
 
 model = load_model("model.pkl")
 
-def recomendar_generos_bn(evidencia: dict, top_k=3):
+def recomendar_generos_bn(evidencia):
+    # Realizamos la inferencia en la BN
     res = query_model(model, variables=["GeneroPrograma"], evidence=evidencia)
-    dist = res["GeneroPrograma"]
+
+    # res será UN SOLO DiscreteFactor → no un dict
+    dist = res
+
+    # Obtener los valores posibles del nodo
     valores = dist.state_names["GeneroPrograma"]
+
+    # Obtener probabilidades
     probs = dist.values
 
-    # Ordenar por prob descendente
-    pares = sorted(
-        zip(valores, probs),
-        key=lambda x: -x[1]
-    )
+    # Asociar cada valor con su probabilidad
+    recomendaciones = list(zip(valores, probs))
 
-    # Return lista ordenada de géneros
-    return pares[:top_k]
+    # Ordenar de mayor a menor probabilidad
+    recomendaciones.sort(key=lambda x: x[1], reverse=True)
+
+    return recomendaciones
