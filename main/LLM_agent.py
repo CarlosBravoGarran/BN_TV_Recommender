@@ -12,16 +12,17 @@ from bn_recommender import recomendar_generos_bn
 # Logging
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
-# Cargar .env
+# Load .env
 env_path = ".env"
 load_dotenv(env_path)
 
-# Inicializar cliente OpenAI
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise RuntimeError("OPENAI_API_KEY not defined in .env file")
 
 client = OpenAI(api_key=api_key)
+
+# SYSTEM PROMPTS
 
 SYSTEM_PROMPT = """
 Eres un asistente de televisión diseñado para ayudar a personas mayores a decidir qué ver.
@@ -56,15 +57,33 @@ Tu tarea es:
 }
 
 NUNCA respondas fuera del JSON.
-
-9. Es muy importante que recojas el feedback del usuario para ver si ha aceptado o rechazado la recomendación previa.
 """
 
-EXTRACTION_PROMPT = """
-Eres un modelo extractor. Debes devolver UNICAMENTE un JSON válido con los siguientes campos.
-Si no puedes inferir alguno, usa null.
+# Intent classifier prompt
 
-Campos:
+INTENT_PROMPT = """
+Eres un clasificador de intención. Devuelve SOLO un JSON válido:
+
+{
+ "intent": "RECOMMEND" | "ALTERNATIVE" | "FEEDBACK_POS" | "FEEDBACK_NEG" | "SMALLTALK" | "OTHER"
+}
+
+Reglas:
+- RECOMMEND: El usuario pide recomendación, sugerencia, qué ver, etc.
+- ALTERNATIVE: El usuario pide otra opción o rechaza la recomendación previa ("otra", "no esa", etc).
+- FEEDBACK_POS: Acepta la recomendación ("me gusta", "perfecto", "vale").
+- FEEDBACK_NEG: La rechaza explícitamente ("no quiero", "eso no").
+- SMALLTALK: Conversación trivial ("hola", "gracias", etc.)
+- OTHER: Todo lo que no encaje.
+
+No añadas texto fuera del JSON.
+"""
+
+# Attribute extraction prompt
+
+EXTRACTION_PROMPT = """
+Eres un modelo extractor. Devuelve SOLO un JSON válido con estos campos:
+
 {
  "Hora": ...,
  "DiaSemana": ...,
@@ -80,40 +99,33 @@ Campos:
 }
 
 Reglas:
+- Si no se menciona algo, usa null.
 - No añadas texto antes ni después del JSON.
-- No incluyas explicaciones.
-- No uses markdown.
-- Para la hora y día coge el los actuales si no se mencionan.
-- La edad clasifícala en rangos: joven (18-35), adulto (36-55), mayor (56+).
-- Duración del programa en minutos: corta (<30), media (30-60), larga (60+)
-- Si indican el tipo de programa (serie, película, documental, etc) úsalo para la duración del programa.
-- GéneroUsuario: "hombre" o "mujer"
-- Hora: "mañana", "tarde", "noche"
-- Día: "laboral" o "fin_semana"
+- No incluyas explicaciones. 
+- No uses markdown. 
+- Para la hora y día coge el los actuales si no se mencionan. 
+- La edad clasifícala en rangos: joven (18-35), adulto (36-55), mayor (56+). 
+- Duración del programa en minutos: corta (<30), media (30-60), larga (60+) 
+- Si indican el tipo de programa (serie, película, documental, etc) úsalo para la duración del programa. 
+- GéneroUsuario: "hombre" o "mujer" - Hora: "mañana", "tarde", "noche" - Día: "laboral" o "fin_semana" 
 - TipoEmision: "bajo_demanda", "diferido", "directo"
 """
 
-def conversar(mensaje_usuario, state, historial=None):
-    if historial is None:
-        historial = []
+# Intent classifier function
 
-    mensajes = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "system", "content": "STATE:\n" + json.dumps(state, indent=2)}
-    ]
-
-    mensajes.extend(historial)
-    mensajes.append({"role": "user", "content": mensaje_usuario})
-
-    respuesta = client.chat.completions.create(
+def clasificar_intencion(mensaje_usuario: str) -> str:
+    resp = client.chat.completions.create(
         model="gpt-4o",
-        messages=mensajes,
-        temperature=0.5
+        messages=[
+            {"role": "system", "content": INTENT_PROMPT},
+            {"role": "user", "content": mensaje_usuario}
+        ],
+        temperature=0
     )
+    data = json.loads(resp.choices[0].message.content)
+    return data["intent"]
 
-    content = respuesta.choices[0].message.content
-    return content
-
+# Attribute extraction
 
 def extraer_atributos_llm(mensaje_usuario: str) -> dict:
 
@@ -126,48 +138,58 @@ def extraer_atributos_llm(mensaje_usuario: str) -> dict:
         temperature=0
     )
 
-    crudo = respuesta.choices[0].message.content.strip()
-    atributos = json.loads(crudo)
-    return atributos
+    return json.loads(respuesta.choices[0].message.content.strip())
+
+# BN inference
 
 def recomendar_por_genero(state: dict) -> dict:
-    """
-    Devuelve un diccionario con solo los atributos_bn de state que no sean nulos.
-    Soporta state donde atributos_bn está en state['context']['atributos_bn'] o en state['atributos_bn'].
-    """
+
     attrs = {}
     if isinstance(state.get("context"), dict) and "atributos_bn" in state["context"]:
         attrs = state["context"].get("atributos_bn") or {}
-    else:
-        attrs = state.get("atributos_bn") or {}
 
-    def _es_nulo(v):
-        return v is None or (isinstance(v, str) and v.strip().lower() in ("null", ""))
-
-    filtrados = {k: v for k, v in attrs.items() if not _es_nulo(v)}
-
-    print("Atributos no nulos para el recomendador BN:", filtrados)
+    filtrados = {k: v for k, v in attrs.items() if v not in (None, "", "null")}
+    print("Atributos no nulos para BN:", filtrados)
 
     return filtrados
 
 def inferir_con_bn(state: dict) -> list:
-    """
-    Filtra los atributos no nulos y ejecuta la BN.
-    Devuelve una lista ordenada de géneros recomendados.
-    """
-    attrs = recomendar_por_genero(state)
 
+    attrs = recomendar_por_genero(state)
     if not attrs:
         print("No hay atributos suficientes para inferencia BN.")
         return []
 
     recomendaciones = recomendar_generos_bn(attrs)
-
     ordenados = [g for g, _ in recomendaciones]
 
-    print("Recomendaciones BN (ordenadas):", ordenados)
+    print("Recomendaciones BN:", ordenados)
     return ordenados
 
+# Conversational LLM
+
+def conversar(mensaje_usuario, state, historial=None):
+
+    mensajes = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": "STATE:\n" + json.dumps(state, indent=2)}
+    ]
+
+    if historial:
+        mensajes.extend(historial)
+
+    mensajes.append({"role": "user", "content": mensaje_usuario})
+
+    respuesta = client.chat.completions.create(
+        model="gpt-4o",
+        messages=mensajes,
+        temperature=0.5
+    )
+
+    return respuesta.choices[0].message.content
+
+
+# MAIN LOOP
 
 if __name__ == "__main__":
     
@@ -190,25 +212,46 @@ if __name__ == "__main__":
     while True:
         mensaje = input("Usuario: ")
 
-        atributos = extraer_atributos_llm(mensaje)
-        state["context"]["atributos_bn"] = atributos
-
-        # INFERENCIA BN → candidatos ordenados
-        state["candidates"] = inferir_con_bn(state)
-
-
-        states_log.append(json.loads(json.dumps(state)))
-
-
         if mensaje.lower().strip() == "salir":
             break
+
+        # 1) Clasificar intención
+        intent = clasificar_intencion(mensaje)
+        print("Intent detectado:", intent)
+
+        # 2) Lógica según intención
+
+        if intent == "RECOMMEND":
+            atributos = extraer_atributos_llm(mensaje)
+            state["context"]["atributos_bn"] = atributos
+            state["candidates"] = inferir_con_bn(state)
+
+        elif intent == "ALTERNATIVE":
+            state["user_feedback"] = "rejected"
+
+        elif intent == "FEEDBACK_POS":
+            state["user_feedback"] = "accepted"
+
+        elif intent == "FEEDBACK_NEG":
+            state["user_feedback"] = "rejected"
+
+        elif intent == "SMALLTALK":
+            pass  # no tocar BN
+
+        elif intent == "OTHER":
+            pass
+
+        # Guardar state
+        states_log.append(json.loads(json.dumps(state)))
+
+        # 3) Conversación final
 
         raw_response = conversar(mensaje, state, historial)
 
         try:
             response = json.loads(raw_response)
         except:
-            print("Error en el formato del modelo:", raw_response)
+            print("ERROR JSON:", raw_response)
             continue
 
         action = response.get("action")
@@ -233,11 +276,12 @@ if __name__ == "__main__":
                 "item": item,
                 "feedback": state["user_feedback"]
             })
-    
-    # Guardar todos los STATES en un archivo JSON
+
+    # Guardado final de states
+
     save_path = Path(__file__).parent / "states.json"
 
     with open(save_path, "w", encoding="utf-8") as f:
         json.dump(states_log, f, indent=2, ensure_ascii=False)
 
-    print(f"Todos los STATES guardados en states.json")
+    print(f"Todos los STATES guardados en {save_path}")
