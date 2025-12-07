@@ -107,7 +107,8 @@ Reglas:
 - La edad clasifícala en rangos: joven (18-35), adulto (36-55), mayor (56+). 
 - Duración del programa en minutos: corta (<30), media (30-60), larga (60+) 
 - Si indican el tipo de programa (serie, película, documental, etc) úsalo para la duración del programa. 
-- GéneroUsuario: "hombre" o "mujer" - Hora: "mañana", "tarde", "noche" - Día: "laboral" o "fin_semana" 
+- GéneroUsuario: "hombre" o "mujer" 
+- Hora: "mañana", "tarde", "noche" - Día: "laboral" o "fin_semana" 
 - TipoEmision: "bajo_demanda", "diferido", "directo"
 """
 
