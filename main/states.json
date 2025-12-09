@@ -1,0 +1,97 @@
+[
+  {
+    "context": {
+      "hour": 20,
+      "day": "Monday",
+      "atributos_bn": {
+        "Hora": "noche",
+        "DiaSemana": "laboral",
+        "GeneroUsuario": "hombre",
+        "EdadUsuario": "joven",
+        "DuracionPrograma": "larga",
+        "TipoEmision": null,
+        "InteresPrevio": null,
+        "GeneroPrograma": null,
+        "PopularidadPrograma": null,
+        "Satisfaccion": null,
+        "Recomendado": null
+      }
+    },
+    "candidates": [
+      "película",
+      "entretenimiento",
+      "noticias"
+    ],
+    "last_recommendation": null,
+    "user_feedback": null,
+    "interaction_history": []
+  },
+  {
+    "context": {
+      "hour": 20,
+      "day": "Monday",
+      "atributos_bn": {
+        "Hora": "noche",
+        "DiaSemana": "laboral",
+        "GeneroUsuario": "hombre",
+        "EdadUsuario": "joven",
+        "DuracionPrograma": "larga",
+        "TipoEmision": null,
+        "InteresPrevio": null,
+        "GeneroPrograma": null,
+        "PopularidadPrograma": null,
+        "Satisfaccion": null,
+        "Recomendado": null
+      }
+    },
+    "candidates": [
+      "película",
+      "entretenimiento",
+      "noticias"
+    ],
+    "last_recommendation": "película",
+    "user_feedback": "rejected",
+    "interaction_history": [
+      {
+        "item": "película",
+        "feedback": null
+      }
+    ]
+  },
+  {
+    "context": {
+      "hour": 20,
+      "day": "Monday",
+      "atributos_bn": {
+        "Hora": "noche",
+        "DiaSemana": "laboral",
+        "GeneroUsuario": "hombre",
+        "EdadUsuario": "joven",
+        "DuracionPrograma": "larga",
+        "TipoEmision": null,
+        "InteresPrevio": null,
+        "GeneroPrograma": null,
+        "PopularidadPrograma": null,
+        "Satisfaccion": null,
+        "Recomendado": null
+      }
+    },
+    "candidates": [
+      "película",
+      "entretenimiento",
+      "noticias"
+    ],
+    "last_recommendation": "entretenimiento",
+    "user_feedback": "accepted",
+    "interaction_history": [
+      {
+        "item": "película",
+        "feedback": null
+      },
+      {
+        "item": "entretenimiento",
+        "feedback": "rejected"
+      }
+    ]
+  }
+]

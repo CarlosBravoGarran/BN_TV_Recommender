@@ -240,7 +240,7 @@ if __name__ == "__main__":
             pass  # no tocar BN
 
         elif intent == "OTHER":
-            pass
+            pass  # no tocar BN
 
         # Guardar state
         states_log.append(json.loads(json.dumps(state)))
@@ -285,4 +285,4 @@ if __name__ == "__main__":
     with open(save_path, "w", encoding="utf-8") as f:
         json.dump(states_log, f, indent=2, ensure_ascii=False)
 
-    print(f"Todos los STATES guardados en {save_path}")
+    print(f"Todos los STATES guardados en states.json")
