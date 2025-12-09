@@ -434,3 +434,5 @@ venv/
 *.bin 
 *.txt
 !requirements.txt
+
+states.json
