@@ -12,6 +12,32 @@ from bn_recommender import recomendar_generos_bn
 # Logging
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
+# ANSI colors for quick visual cues per intervention type
+COLOR_RESET = "\033[0m"
+ACTION_COLORS = {
+    "RECOMMEND": "\033[92m",   # green
+    "ASK": "\033[96m",         # cyan
+    "ALTERNATIVE": "\033[93m", # yellow
+    "SMALLTALK": "\033[95m",   # magenta
+    "FEEDBACK": "\033[94m",    # blue
+}
+INTENT_COLORS = {
+    "RECOMMEND": "\033[92m",
+    "ALTERNATIVE": "\033[93m",
+    "FEEDBACK_POS": "\033[94m",
+    "FEEDBACK_NEG": "\033[91m",
+    "SMALLTALK": "\033[95m",
+    "OTHER": "\033[90m",
+}
+BN_LOG_COLOR = "\033[90m"  # dim gray for internal BN logs
+
+
+def colorize(text: str, color_code: str) -> str:
+    if not color_code:
+        return text
+    return f"{color_code}{text}{COLOR_RESET}"
+
+
 # Load .env
 env_path = ".env"
 load_dotenv(env_path)
@@ -150,7 +176,7 @@ def recomendar_por_genero(state: dict) -> dict:
         attrs = state["context"].get("atributos_bn") or {}
 
     filtrados = {k: v for k, v in attrs.items() if v not in (None, "", "null")}
-    print("Atributos no nulos para BN:", filtrados)
+    print(colorize(f"Atributos no nulos para BN: {filtrados}", BN_LOG_COLOR))
 
     return filtrados
 
@@ -158,13 +184,13 @@ def inferir_con_bn(state: dict) -> list:
 
     attrs = recomendar_por_genero(state)
     if not attrs:
-        print("No hay atributos suficientes para inferencia BN.")
+        print(colorize("No hay atributos suficientes para inferencia BN.", BN_LOG_COLOR))
         return []
 
     recomendaciones = recomendar_generos_bn(attrs)
     ordenados = [g for g, _ in recomendaciones]
 
-    print("Recomendaciones BN:", ordenados)
+    print(colorize(f"Recomendaciones BN: {ordenados}", BN_LOG_COLOR))
     return ordenados
 
 # Conversational LLM
@@ -218,7 +244,8 @@ if __name__ == "__main__":
 
         # 1) Clasificar intención
         intent = clasificar_intencion(mensaje)
-        print("Intent detectado:", intent)
+        intent_msg = f"Intent detectado: {intent}"
+        print(colorize(intent_msg, INTENT_COLORS.get(intent, "")))
 
         # 2) Lógica según intención
 
@@ -259,7 +286,10 @@ if __name__ == "__main__":
         message = response.get("message")
         item = response.get("item")
 
-        print("Asistente:", message)
+        action_color = ACTION_COLORS.get(action, "")
+        action_tag = action if action else "UNKNOWN"
+        assistant_line = f"Asistente ({action_tag}): {message}"
+        print(colorize(assistant_line, action_color))
 
         historial.append({"role": "user", "content": mensaje})
         historial.append({"role": "assistant", "content": message})
