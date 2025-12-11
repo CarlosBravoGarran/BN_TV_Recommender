@@ -33,7 +33,13 @@ if __name__ == "__main__":
     model_path = "main/outputs/model.pkl"
     model = load_model(model_path)
 
-    evidence = {"EdadUsuario": "mayor", "Hora": "noche", "DiaSemana": "fin_semana", "DuracionPrograma": "media", "PopularidadPrograma": "alta", "InteresPrevio": "entretenimiento"}
+    evidence = {"EdadUsuario": "mayor", 
+                "Hora": "noche", 
+                "DiaSemana": "fin_semana", 
+                "DuracionPrograma": "media", 
+                "PopularidadPrograma": "alta", 
+                "InteresPrevio": "entretenimiento"}
     res = query_model(model, variables=["GeneroPrograma"], evidence=evidence)
+    
     print("\nGénero recomendado para usuario:")
     print(res)
