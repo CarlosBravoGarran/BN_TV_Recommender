@@ -74,7 +74,8 @@ Tu tarea es:
 5. SIEMPRE usar los candidatos del state si existen.
 6. Si no hay candidatos, recomendar por género ("comedia", "documental", etc).
 7. Si el usuario ha rechazado algo, ofrecer una alternativa distinta.
-8. Responder SIEMPRE con un JSON con los campos:
+8. Recomienda solamente un género o título a la vez.
+9. Responder SIEMPRE con un JSON con los campos:
 
 {
  "action": "RECOMMEND" | "ASK" | "ALTERNATIVE" | "SMALLTALK" | "FEEDBACK",
@@ -130,11 +131,13 @@ Reglas:
 - No incluyas explicaciones. 
 - No uses markdown. 
 - Para la hora y día coge el los actuales si no se mencionan. 
+- No confundas el número de la edad con la hora ni con la duración del programa.
 - La edad clasifícala en rangos: joven (18-35), adulto (36-55), mayor (56+). 
 - Duración del programa en minutos: corta (<30), media (30-60), larga (60+) 
 - Si indican el tipo de programa (serie, película, documental, etc) úsalo para la duración del programa. 
 - GéneroUsuario: "hombre" o "mujer" 
-- Hora: "mañana", "tarde", "noche" - Día: "laboral" o "fin_semana" 
+- Hora: "mañana" (7:00-12:00), "tarde" (12:00-20:00), "noche" (20:00-7:00)
+- Día: "laboral" o "fin_semana" 
 - TipoEmision: "bajo_demanda", "diferido", "directo"
 """
 
