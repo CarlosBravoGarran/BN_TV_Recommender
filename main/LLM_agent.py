@@ -1,7 +1,6 @@
 import json
 import os
 import logging
-from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -55,11 +54,10 @@ Eres un asistente de televisión diseñado para ayudar a personas mayores a deci
 Tu comportamiento depende del state que recibirás en cada turno.
 
 El state contiene:
-- contexto del usuario (hora, día, género)
+- atributos_bn (atributos extraídos para el BN)
 - candidatos del recomendador
 - la última recomendación del turno anterior
 - feedback del usuario ("accepted" o "rejected")
-- el historial reciente de recomendaciones y respuestas
 
 Tu tarea es:
 1. Interpretar la intención del usuario.
@@ -174,9 +172,7 @@ def extraer_atributos_llm(mensaje_usuario: str) -> dict:
 
 def recomendar_por_genero(state: dict) -> dict:
 
-    attrs = {}
-    if isinstance(state.get("context"), dict) and "atributos_bn" in state["context"]:
-        attrs = state["context"].get("atributos_bn") or {}
+    attrs = state.get("atributos_bn") or {}
 
     filtrados = {k: v for k, v in attrs.items() if v not in (None, "", "null")}
     print(colorize(f"Atributos no nulos para BN: {filtrados}", BN_LOG_COLOR))
@@ -227,14 +223,10 @@ if __name__ == "__main__":
     states_log = []
 
     state = {
-        "context": {
-            "hour": datetime.now().hour,
-            "day": datetime.now().strftime("%A"),
-        },
+        "atributos_bn": {},
         "candidates": [],
         "last_recommendation": None,
-        "user_feedback": None,
-        "interaction_history": []
+        "user_feedback": None
     }
 
     print("Asistente de TV. Escribe 'salir' para terminar.\n")
@@ -254,7 +246,7 @@ if __name__ == "__main__":
 
         if intent == "RECOMMEND":
             atributos = extraer_atributos_llm(mensaje)
-            state["context"]["atributos_bn"] = atributos
+            state["atributos_bn"] = atributos
             state["candidates"] = inferir_con_bn(state)
 
         elif intent == "ALTERNATIVE":
@@ -304,12 +296,6 @@ if __name__ == "__main__":
             state["user_feedback"] = "rejected"
         elif action == "RECOMMEND":
             state["user_feedback"] = None
-
-        if item:
-            state["interaction_history"].append({
-                "item": item,
-                "feedback": state["user_feedback"]
-            })
 
     # Guardado final de states
 
