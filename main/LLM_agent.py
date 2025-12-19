@@ -117,10 +117,7 @@ Eres un modelo extractor. Devuelve SOLO un JSON válido con estos campos:
  "DuracionPrograma": ...,
  "TipoEmision": ...,
  "InteresPrevio": ...,
- "GeneroPrograma": ...,
- "PopularidadPrograma": ...,
- "Satisfaccion": ...,
- "Recomendado": ...
+ "PopularidadPrograma": ...
 }
 
 Reglas:
@@ -128,7 +125,7 @@ Reglas:
 - No añadas texto antes ni después del JSON.
 - No incluyas explicaciones. 
 - No uses markdown. 
-- Para la hora y día coge el los actuales si no se mencionan. 
+- Para la hora y día coge el los actuales del sistema si no se mencionan. 
 - No confundas el número de la edad con la hora ni con la duración del programa.
 - La edad clasifícala en rangos: joven (18-35), adulto (36-55), mayor (56+). 
 - Duración del programa en minutos: corta (<30), media (30-60), larga (60+) 
