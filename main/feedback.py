@@ -6,9 +6,7 @@ from pgmpy.factors.discrete import TabularCPD
 from graph_builder import load_model
 
 
-# ============================================================
 # Inicialización de conteos a partir de CPDs existentes
-# ============================================================
 
 def initialize_cpt_counts(model, virtual_sample_size=100):
     """
@@ -41,10 +39,7 @@ def initialize_cpt_counts(model, virtual_sample_size=100):
 
     return cpt_counts
 
-
-# ============================================================
 # Reconstrucción segura de CPDs desde conteos
-# ============================================================
 
 def build_cpd_from_counts(variable, cpt_info):
     parents = cpt_info["parents"]
@@ -77,9 +72,7 @@ def build_cpd_from_counts(variable, cpt_info):
     )
 
 
-# ============================================================
 # Aplicación de feedback del usuario
-# ============================================================
 
 def apply_feedback(model, cpt_counts, state):
     """
@@ -96,9 +89,7 @@ def apply_feedback(model, cpt_counts, state):
     attrs = state["atributos_bn"]
     genero_programa = state["last_recommendation"]
 
-    # --------------------------------------------------------
     # CPT: Recomendado | Satisfaccion, PopularidadPrograma
-    # --------------------------------------------------------
 
     cpt = cpt_counts["Recomendado"]
     parent_state = (
@@ -109,19 +100,14 @@ def apply_feedback(model, cpt_counts, state):
     # IGNORAR feedback incompatible con la BN
     if parent_state in cpt["counts"]:
         recomendado = "sí" if feedback == "accepted" else "no"
-        cpt["counts"][parent_state][recomendado] += 1
+        cpt["counts"][parent_state][recomendado] += 100
 
         new_cpd = build_cpd_from_counts("Recomendado", cpt)
         model.remove_cpds("Recomendado")
         model.add_cpds(new_cpd)
 
-    # --------------------------------------------------------
-    # CPT: GeneroPrograma | Satisfaccion, DuracionPrograma,
-    #                      TipoEmision, InteresPrevio
-    # --------------------------------------------------------
-
     cpt = cpt_counts["GeneroPrograma"]
-    
+
     # Valor neutro fijo de InteresPrevio (no se aprende por feedback)
     interes_previo_fijo = cpt["state_names"]["InteresPrevio"][0]
 
@@ -141,11 +127,7 @@ def apply_feedback(model, cpt_counts, state):
 
     model.check_model()
 
-
-# ============================================================
-# Ejecución
-# ============================================================
-
+# Prueba de ejecución
 if __name__ == "__main__":
     model = load_model("main/outputs/model.pkl")
     cpt_counts = initialize_cpt_counts(model)

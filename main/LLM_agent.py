@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from bn_recommender import recomendar_generos_bn
+from graph_builder import load_model
+from feedback import initialize_cpt_counts, apply_feedback
 
 # Logging
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -176,14 +178,14 @@ def recomendar_por_genero(state: dict) -> dict:
 
     return filtrados
 
-def inferir_con_bn(state: dict) -> list:
+def inferir_con_bn(state: dict, model) -> list:
 
     attrs = recomendar_por_genero(state)
     if not attrs:
         print(colorize("No hay atributos suficientes para inferencia BN.", BN_LOG_COLOR))
         return []
 
-    recomendaciones = recomendar_generos_bn(attrs)
+    recomendaciones = recomendar_generos_bn(attrs, model)
     ordenados = [g for g, _ in recomendaciones]
 
     print(colorize(f"Recomendaciones BN: {ordenados}", BN_LOG_COLOR))
@@ -228,6 +230,9 @@ if __name__ == "__main__":
 
     print("Asistente de TV. Escribe 'salir' para terminar.\n")
 
+    model = load_model("main/outputs/model.pkl")
+    cpt_counts = initialize_cpt_counts(model)
+
     while True:
         mensaje = input("Usuario: ")
 
@@ -244,16 +249,18 @@ if __name__ == "__main__":
         if intent == "RECOMMEND":
             atributos = extraer_atributos_llm(mensaje)
             state["atributos_bn"] = atributos
-            state["candidates"] = inferir_con_bn(state)
+            state["candidates"] = inferir_con_bn(state, model)
 
         elif intent == "ALTERNATIVE":
             state["user_feedback"] = "rejected"
+            apply_feedback(model, cpt_counts, state)
 
         elif intent == "FEEDBACK_POS":
             state["user_feedback"] = "accepted"
-
+            apply_feedback(model, cpt_counts, state)
         elif intent == "FEEDBACK_NEG":
             state["user_feedback"] = "rejected"
+            apply_feedback(model, cpt_counts, state)
 
         elif intent == "SMALLTALK":
             pass  # no tocar BN
