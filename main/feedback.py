@@ -121,7 +121,7 @@ def apply_feedback(model, cpt_counts, state):
     # --------------------------------------------------------
 
     cpt = cpt_counts["GeneroPrograma"]
-
+    
     # Valor neutro fijo de InteresPrevio (no se aprende por feedback)
     interes_previo_fijo = cpt["state_names"]["InteresPrevio"][0]
 
