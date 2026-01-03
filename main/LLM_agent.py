@@ -56,7 +56,7 @@ Eres un asistente de televisión diseñado para ayudar a personas mayores a deci
 Tu comportamiento depende del state que recibirás en cada turno.
 
 El state contiene:
-- atributos_bn (atributos extraídos para el BN)
+- atributes_bn (atributos extraídos para el BN)
 - candidatos del recomendador
 - la última recomendación del turno anterior
 - feedback del usuario ("accepted" o "rejected")
@@ -140,12 +140,12 @@ Reglas:
 
 # Intent classifier function
 
-def clasificar_intencion(mensaje_usuario: str) -> str:
+def classify_intent(user_message: str) -> str:
     resp = client.chat.completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": INTENT_PROMPT},
-            {"role": "user", "content": mensaje_usuario}
+            {"role": "user", "content": user_message}
         ],
         temperature=0
     )
@@ -154,102 +154,102 @@ def clasificar_intencion(mensaje_usuario: str) -> str:
 
 # Attribute extraction
 
-def extraer_atributos_llm(mensaje_usuario: str) -> dict:
+def extract_attributes_llm(user_message: str) -> dict:
 
-    respuesta = client.chat.completions.create(
+    response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": EXTRACTION_PROMPT},
-            {"role": "user", "content": mensaje_usuario}
+            {"role": "user", "content": user_message}
         ],
         temperature=0
     )
 
-    return json.loads(respuesta.choices[0].message.content.strip())
+    return json.loads(response.choices[0].message.content.strip())
 
 # BN inference
 
-def recomendar_por_genero(state: dict) -> dict:
+def recommend_by_genre(state: dict) -> dict:
 
-    attrs = state.get("atributos_bn") or {}
+    attrs = state.get("atributes_bn") or {}
 
-    filtrados = {k: v for k, v in attrs.items() if v not in (None, "", "null")}
-    print(colorize(f"Atributos no nulos para BN: {filtrados}", BN_LOG_COLOR))
+    filtered = {k: v for k, v in attrs.items() if v not in (None, "", "null")}
+    print(colorize(f"Non-null attributes for BN: {filtered}", BN_LOG_COLOR))
 
-    return filtrados
+    return filtered
 
-def inferir_con_bn(state: dict, model) -> list:
+def infer_with_bn(state: dict, model) -> list:
 
-    attrs = recomendar_por_genero(state)
+    attrs = recommend_by_genre(state)
     if not attrs:
-        print(colorize("No hay atributos suficientes para inferencia BN.", BN_LOG_COLOR))
+        print(colorize("Not enough attributes for BN inference.", BN_LOG_COLOR))
         return []
 
-    recomendaciones = recomendar_generos_bn(attrs, model)
-    ordenados = [g for g, _ in recomendaciones]
+    recommendations = recomendar_generos_bn(attrs, model)
+    sorted_items = [g for g, _ in recommendations]
 
-    print(colorize(f"Recomendaciones BN: {ordenados}", BN_LOG_COLOR))
-    return ordenados
+    print(colorize(f"BN Recommendations: {sorted_items}", BN_LOG_COLOR))
+    return sorted_items
 
 # Conversational LLM
 
-def conversar(mensaje_usuario, state, historial=None):
+def converse(user_message, state, history=None):
 
-    mensajes = [
+    messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "system", "content": "STATE:\n" + json.dumps(state, indent=2)}
     ]
 
-    if historial:
-        mensajes.extend(historial)
+    if history:
+        messages.extend(history)
 
-    mensajes.append({"role": "user", "content": mensaje_usuario})
+    messages.append({"role": "user", "content": user_message})
 
-    respuesta = client.chat.completions.create(
+    response = client.chat.completions.create(
         model="gpt-4o",
-        messages=mensajes,
+        messages=messages,
         temperature=0.5
     )
 
-    return respuesta.choices[0].message.content
+    return response.choices[0].message.content
 
 
 # MAIN LOOP
 
 if __name__ == "__main__":
     
-    historial = []
+    history = []
     states_log = []
 
     state = {
-        "atributos_bn": {},
+        "atributes_bn": {},
         "candidates": [],
         "last_recommendation": None,
         "user_feedback": None
     }
 
-    print("Asistente de TV. Escribe 'salir' para terminar.\n")
+    print("TV Assistant. Type 'exit' to quit.\n")
 
     model = load_model("main/outputs/model.pkl")
     cpt_counts = initialize_cpt_counts(model)
 
     while True:
-        mensaje = input("Usuario: ")
+        mensaje = input("User: ")
 
-        if mensaje.lower().strip() == "salir":
+        if mensaje.lower().strip() == "exit":
             break
 
-        # 1) Clasificar intención
-        intent = clasificar_intencion(mensaje)
-        intent_msg = f"Intent detectado: {intent}"
+        # 1) Classify intent
+        intent = classify_intent(mensaje)
+        intent_msg = f"Detected intent: {intent}"
         print(colorize(intent_msg, INTENT_COLORS.get(intent, "")))
 
-        # 2) Lógica según intención
+        # 2) Logic based on intent
 
         if intent == "RECOMMEND":
-            atributos = extraer_atributos_llm(mensaje)
-            state["atributos_bn"] = atributos
-            state["candidates"] = inferir_con_bn(state, model)
+            atributes = extract_attributes_llm(mensaje)
+            state["atributes_bn"] = atributes
+            state["candidates"] = infer_with_bn(state, model)
 
         elif intent == "ALTERNATIVE":
             state["user_feedback"] = "rejected"
@@ -263,22 +263,22 @@ if __name__ == "__main__":
             apply_feedback(model, cpt_counts, state)
 
         elif intent == "SMALLTALK":
-            pass  # no tocar BN
+            pass  # do not modify BN
 
         elif intent == "OTHER":
-            pass  # no tocar BN
+            pass  # do not modify BN
 
-        # Guardar state
+        # Save state
         states_log.append(json.loads(json.dumps(state)))
 
-        # 3) Conversación final
+        # 3) Final conversation
 
-        raw_response = conversar(mensaje, state, historial)
+        raw_response = converse(mensaje, state, history)
 
         try:
             response = json.loads(raw_response)
         except:
-            print("ERROR JSON:", raw_response)
+            print("JSON ERROR:", raw_response)
             continue
 
         action = response.get("action")
@@ -287,11 +287,11 @@ if __name__ == "__main__":
 
         action_color = ACTION_COLORS.get(action, "")
         action_tag = action if action else "UNKNOWN"
-        assistant_line = f"Asistente ({action_tag}): {message}"
+        assistant_line = f"Assistant ({action_tag}): {message}"
         print(colorize(assistant_line, action_color))
 
-        historial.append({"role": "user", "content": mensaje})
-        historial.append({"role": "assistant", "content": message})
+        history.append({"role": "user", "content": mensaje})
+        history.append({"role": "assistant", "content": message})
 
         if item:
             state["last_recommendation"] = item
@@ -301,11 +301,11 @@ if __name__ == "__main__":
         elif action == "RECOMMEND":
             state["user_feedback"] = None
 
-    # Guardado final de states
+    # Final state save
 
     save_path = Path(__file__).parent / "states.json"
 
     with open(save_path, "w", encoding="utf-8") as f:
         json.dump(states_log, f, indent=2, ensure_ascii=False)
 
-    print(f"Todos los STATES guardados en states.json")
+    print(f"All STATES saved to states.json")
