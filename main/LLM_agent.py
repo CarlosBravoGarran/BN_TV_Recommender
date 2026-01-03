@@ -6,7 +6,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from bn_recommender import recomendar_generos_bn
+from bn_recommender import recommend_gender
 from graph_builder import load_model
 from feedback import initialize_cpt_counts, apply_feedback
 
@@ -185,7 +185,7 @@ def infer_with_bn(state: dict, model) -> list:
         print(colorize("Not enough attributes for BN inference.", BN_LOG_COLOR))
         return []
 
-    recommendations = recomendar_generos_bn(attrs, model)
+    recommendations = recommend_gender(attrs, model)
     sorted_items = [g for g, _ in recommendations]
 
     print(colorize(f"BN Recommendations: {sorted_items}", BN_LOG_COLOR))

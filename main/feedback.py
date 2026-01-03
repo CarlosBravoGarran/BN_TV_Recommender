@@ -6,11 +6,11 @@ from pgmpy.factors.discrete import TabularCPD
 from graph_builder import load_model
 
 
-# Inicialización de conteos a partir de CPDs existentes
+# Initialize counts from existing CPDs
 
 def initialize_cpt_counts(model, virtual_sample_size=100):
     """
-    Convierte las CPDs del modelo en conteos iniciales en memoria.
+    Convert model CPDs into initial in-memory counts.
     """
     cpt_counts = {}
 
@@ -39,7 +39,7 @@ def initialize_cpt_counts(model, virtual_sample_size=100):
 
     return cpt_counts
 
-# Reconstrucción segura de CPDs desde conteos
+# Safe reconstruction of CPDs from counts
 
 def build_cpd_from_counts(variable, cpt_info):
     parents = cpt_info["parents"]
@@ -48,7 +48,7 @@ def build_cpd_from_counts(variable, cpt_info):
 
     var_states = state_names[variable]
 
-    # SOLO combinaciones válidas de estados de padres
+    # Only valid combinations of parent states.
     parent_states = [state_names[p] for p in parents]
     valid_parent_combinations = list(itertools.product(*parent_states))
 
@@ -72,35 +72,35 @@ def build_cpd_from_counts(variable, cpt_info):
     )
 
 
-# Aplicación de feedback del usuario
+# Apply user feedback
 
 def apply_feedback(model, cpt_counts, state):
     """
-    Aplica feedback de un estado y actualiza CPTs afectadas.
+    Apply feedback from a state and update affected CPTs.
     """
 
     feedback = state.get("user_feedback")
     if feedback is None:
         return
 
-    # 1. Mapear feedback a variable latente
-    satisfaccion = "alta" if feedback == "accepted" else "baja"
+    # Map feedback to a latent variable.
+    satisfaction = "alta" if feedback == "accepted" else "baja"
 
-    attrs = state["atributos_bn"]
-    genero_programa = state["last_recommendation"]
+    bn_attributes = state["atributes_bn"]
+    program_genre = state["last_recommendation"]
 
     # CPT: Recomendado | Satisfaccion, PopularidadPrograma
 
     cpt = cpt_counts["Recomendado"]
     parent_state = (
-        satisfaccion,
-        attrs.get("PopularidadPrograma", "media")
+        satisfaction,
+        bn_attributes.get("PopularidadPrograma", "media")
     )
 
-    # IGNORAR feedback incompatible con la BN
+    # Ignore feedback incompatible with the BN.
     if parent_state in cpt["counts"]:
-        recomendado = "sí" if feedback == "accepted" else "no"
-        cpt["counts"][parent_state][recomendado] += 100
+        recommended_state = "sí" if feedback == "accepted" else "no"
+        cpt["counts"][parent_state][recommended_state] += 100
 
         new_cpd = build_cpd_from_counts("Recomendado", cpt)
         model.remove_cpds("Recomendado")
@@ -108,18 +108,18 @@ def apply_feedback(model, cpt_counts, state):
 
     cpt = cpt_counts["GeneroPrograma"]
 
-    # Valor neutro fijo de InteresPrevio (no se aprende por feedback)
-    interes_previo_fijo = cpt["state_names"]["InteresPrevio"][0]
+    # Fixed neutral value for InteresPrevio (not learned from feedback).
+    fixed_prior_interest = cpt["state_names"]["InteresPrevio"][0]
 
     parent_state = (
-        satisfaccion,
-        attrs["DuracionPrograma"],
-        attrs.get("TipoEmision", "desconocido"),
-        interes_previo_fijo,
+        satisfaction,
+        bn_attributes["DuracionPrograma"],
+        bn_attributes.get("TipoEmision", "desconocido"),
+        fixed_prior_interest,
     )
 
     if parent_state in cpt["counts"]:
-        cpt["counts"][parent_state][genero_programa] += 1
+        cpt["counts"][parent_state][program_genre] += 1
 
         new_cpd = build_cpd_from_counts("GeneroPrograma", cpt)
         model.remove_cpds("GeneroPrograma")
@@ -127,7 +127,7 @@ def apply_feedback(model, cpt_counts, state):
 
     model.check_model()
 
-# Prueba de ejecución
+# Execution test
 if __name__ == "__main__":
     model = load_model("main/outputs/model.pkl")
     cpt_counts = initialize_cpt_counts(model)
