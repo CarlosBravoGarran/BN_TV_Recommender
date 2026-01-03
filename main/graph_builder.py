@@ -1,13 +1,13 @@
 """graph_builder.py
 
-Funciones para construir una Red Bayesiana (estructura + CPDs) a partir
-de un CSV y para guardar/visualizar el resultado.
-Este módulo agrupa la parte de creación/ajuste del grafo original
-de `graph_gen.py` para que pueda reutilizarse desde otros scripts (p. ej. inferencia).
+Utilities to build a Bayesian Network (structure + CPDs) from a CSV and
+save/visualize the result.
+This module groups the creation/fitting logic from the original `graph_gen.py`
+so it can be reused from other scripts (e.g., inference).
 """
 
 import pandas as pd
-from pgmpy.estimators import HillClimbSearch, BIC, BayesianEstimator, BDeu
+from pgmpy.estimators import HillClimbSearch, BayesianEstimator, BDeu
 from pgmpy.models import DiscreteBayesianNetwork
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -15,25 +15,25 @@ import pickle
 
 
 def load_data(path: str) -> pd.DataFrame:
-    """Carga el dataset desde un CSV y devuelve un DataFrame."""
+    """Load the dataset from a CSV and return a DataFrame."""
     return pd.read_csv(path)
 
 
 def learn_structure(df: pd.DataFrame):
-    """Aprende la estructura usando Hill Climb y BDeu.
-    Devuelve el objeto de modelo (networkx.DiGraph-like de pgmpy) con los arcos.
+    """Learn the structure using Hill Climb and BDeu.
+    Returns the model object (pgmpy networkx.DiGraph-like) with the edges.
     """
-    hc = HillClimbSearch(df)
-    best_model = hc.estimate(scoring_method=BDeu(df, equivalent_sample_size=100))
-    return best_model
+    hill_climb = HillClimbSearch(df)
+    best_structure = hill_climb.estimate(scoring_method=BDeu(df, equivalent_sample_size=100))
+    return best_structure
 
 
-def save_edges(best_model, path: str = "best_model_edges.csv") -> None:
-    """Guarda los arcos del mejor modelo en CSV (source,target)."""
+def save_edges(best_structure, path: str = "best_model_edges.csv") -> None:
+    """Save the best model edges to a CSV (source,target)."""
     with open(path, "w", encoding="utf-8") as f:
         f.write("source,target\n")
-        for u, v in best_model.edges():
-            f.write(f"{u},{v}\n")
+        for source, target in best_structure.edges():
+            f.write(f"{source},{target}\n")
 
 
 def build_and_fit_model(
@@ -44,18 +44,23 @@ def build_and_fit_model(
     equivalent_sample_size: int = 100,
     visualize: bool = True,
 ) -> tuple[DiscreteBayesianNetwork, pd.DataFrame]:
-    """Flujo completo: carga datos, aprende estructura, crea modelo, ajusta CPDs.
-    Opcionalmente guarda los arcos y el modelo (pickle) y visualiza la red.
-    Devuelve (model, df).
+    """Full pipeline: load data, learn structure, build model, fit CPDs.
+    Optionally saves edges and the model (pickle) and visualizes the network.
+    Returns (model, data_frame).
     """
-    df = load_data(csv_path)
-    best_model = learn_structure(df)
+    data_frame = load_data(csv_path)
+    best_structure = learn_structure(data_frame)
 
     if save_edges_path:
-        save_edges(best_model, save_edges_path)
+        save_edges(best_structure, save_edges_path)
 
-    model = DiscreteBayesianNetwork(best_model.edges())
-    model.fit(df, estimator=BayesianEstimator, prior_type=prior_type, equivalent_sample_size=equivalent_sample_size)
+    model = DiscreteBayesianNetwork(best_structure.edges())
+    model.fit(
+        data_frame,
+        estimator=BayesianEstimator,
+        prior_type=prior_type,
+        equivalent_sample_size=equivalent_sample_size,
+    )
 
     if save_model_path:
         save_model(model, save_model_path)
@@ -63,20 +68,20 @@ def build_and_fit_model(
     if visualize:
         visualize_model(model)
 
-    return model, df
+    return model, data_frame
 
 
 def visualize_model(model: DiscreteBayesianNetwork, figsize=(10, 8)) -> None:
-    """Dibuja la red usando networkx/matplotlib.
-    No muestra la figura si se ejecuta en un entorno sin display; caller decide.
+    """Draw the network using networkx/matplotlib.
+    It does not display the figure if running without a display; caller decides.
     """
-    G = nx.DiGraph()
-    G.add_edges_from(model.edges())
+    graph = nx.DiGraph()
+    graph.add_edges_from(model.edges())
 
     plt.figure(figsize=figsize)
-    pos = nx.spring_layout(G, seed=42)
+    pos = nx.spring_layout(graph, seed=42)
     nx.draw(
-        G,
+        graph,
         pos,
         with_labels=True,
         node_size=1000,
@@ -85,7 +90,7 @@ def visualize_model(model: DiscreteBayesianNetwork, figsize=(10, 8)) -> None:
         arrowsize=20,
         edgecolors="black",
     )
-    plt.title("Red Bayesiana aprendida automáticamente", fontsize=14)
+    plt.title("Automatically learned Bayesian Network", fontsize=14)
     try:
         plt.show()
     except Exception:
@@ -93,35 +98,33 @@ def visualize_model(model: DiscreteBayesianNetwork, figsize=(10, 8)) -> None:
 
 
 def save_model(model: DiscreteBayesianNetwork, path: str) -> None:
-    """Guarda el modelo en un archivo usando pickle."""
+    """Save the model to a file using pickle."""
     with open(path, "wb") as f:
         pickle.dump(model, f)
 
 
 def load_model(path: str) -> DiscreteBayesianNetwork:
-    """Carga un modelo guardado con `save_model`."""
+    """Load a model saved with `save_model`."""
     with open(path, "rb") as f:
         model = pickle.load(f)
     return model
 
-import os
 
-def save_cpds_to_txt(model, path: str = "model_cpds.txt") -> None:
-    """Guarda todas las CPDs (tablas de probabilidad) en un único archivo de texto."""
-    
+def save_cpds_to_text(model, path: str = "model_cpds.txt") -> None:
+    """Save all CPDs (conditional probability tables) to a single text file."""
     with open(path, "w", encoding="utf-8") as f:
-        f.write("📊 Tablas de probabilidad condicional (CPDs) aprendidas\n")
+        f.write("Conditional probability tables (CPDs)\n")
         f.write("=" * 80 + "\n\n")
 
         for cpd in model.get_cpds():
-            f.write(f"CPD de {cpd.variable}:\n")
+            f.write(f"CPD for {cpd.variable}:\n")
             f.write(str(cpd))
             f.write("\n" + "-" * 80 + "\n")
 
-    print(f"✅ CPDs guardadas en '{path}'")
+    print(f"CPDs saved to '{path}'")
 
 
 if __name__ == "__main__":
-    model, df = build_and_fit_model(csv_path="main/tv_bn_dataset.csv")
-    save_cpds_to_txt(model, path="model_cpds.txt")
+    model, data_frame = build_and_fit_model(csv_path="main/tv_bn_dataset.csv")
+    save_cpds_to_text(model, path="model_cpds.txt")
     
