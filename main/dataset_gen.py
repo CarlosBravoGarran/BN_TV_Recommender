@@ -107,7 +107,7 @@ df_profile = pd.DataFrame({
     'ProgramDuration': program_duration
 })
 
-df_profile.to_csv("consumers_profile.csv", index=False)
+df_profile.to_csv("main/consumers_profile.csv", index=False)
 
 print("✅ ConsumersProfile dataset generated successfully")
 print(df_profile.head())
