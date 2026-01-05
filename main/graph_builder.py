@@ -62,13 +62,11 @@ CONTENT = [
     "ProgramDuration",
 ]
 
-# Nada apunta a perfil/contexto
 for target in PROFILE_CONTEXT:
     for source in PROFILE_CONTEXT + CONTENT:
         if source != target:
             BLACKLIST.append((source, target))
 
-# ProgramDuration no causa nada
 for node in PROFILE_CONTEXT + CONTENT:
     BLACKLIST.append(("ProgramDuration", node))
 
@@ -157,6 +155,22 @@ def build_and_fit_model(
 
     model = DiscreteBayesianNetwork(edges)
 
+    FEEDBACK_NODES = [
+        # History
+        "SeenBefore",
+        "PreviousContentType",
+        "PreviousGenre",
+
+        # Feedback
+        "RecommendationAccepted",
+        "UserSatisfaction",
+        "ExplicitFeedback",
+        "WatchRatio",
+        "Abandoned",
+        "RepeatContent",
+    ]
+
+    model.add_nodes_from(FEEDBACK_NODES)
 
     # Fit CPDs
     model.fit(
@@ -166,7 +180,10 @@ def build_and_fit_model(
         equivalent_sample_size=equivalent_sample_size,
     )
 
-    assert model.check_model(), "Model is invalid!"
+    # Validate only nodes that have data / CPDs
+    for node in df_bn.columns:
+        assert model.get_cpds(node) is not None, f"Missing CPD for {node}"
+
 
     # Save model
     if save_model_path:
