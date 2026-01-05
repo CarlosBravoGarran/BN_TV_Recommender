@@ -15,7 +15,7 @@ This BN represents user profile + context → content attributes.
 """
 
 import pandas as pd
-from pgmpy.estimators import HillClimbSearch, BayesianEstimator, BDeu, BIC, K2
+from pgmpy.estimators import HillClimbSearch, BayesianEstimator, BDeu
 from pgmpy.models import DiscreteBayesianNetwork
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -121,7 +121,7 @@ def build_and_fit_model(
     save_cpds_path: str = "main/outputs/model_cpds.txt",
     prior_type: str = "BDeu",
     equivalent_sample_size: int = 100,
-    visualize: bool = True,
+    visualize: bool = False,
 ):
     """
     Full pipeline:
