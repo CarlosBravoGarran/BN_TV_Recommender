@@ -22,10 +22,6 @@ household_type = np.random.choice(
     ['single', 'couple', 'family'], N, p=[0.3, 0.4, 0.3]
 )
 
-tech_level = np.random.choice(
-    ['low', 'medium', 'high'], N, p=[0.3, 0.5, 0.2]
-)
-
 # -------------------------
 # CONTEXT
 # -------------------------
@@ -41,40 +37,102 @@ day_type = np.random.choice(
 # CONTENT ATTRIBUTES
 # -------------------------
 
-# ProgramType depends on age and time of day
+# ProgramType depends on age, time of day, day type, gender, and household type
 program_type = []
-for age, time in zip(user_age, time_of_day):
+for age, time, gender, household, day in zip(
+    user_age, time_of_day, user_gender, household_type, day_type
+):
     if age == 'senior':
-        pt = np.random.choice(
-            ['news', 'movie', 'documentary'], p=[0.5, 0.3, 0.2]
-        )
+        if day == 'weekday':
+            pt = np.random.choice(
+                ['news', 'documentary', 'movie'], p=[0.6, 0.25, 0.15]
+            )
+        elif household == 'family':
+            pt = np.random.choice(
+                ['news', 'documentary', 'movie'], p=[0.55, 0.25, 0.2]
+            )
+        else:
+            pt = np.random.choice(
+                ['news', 'movie', 'documentary'], p=[0.5, 0.3, 0.2]
+            )
     elif time == 'night':
-        pt = np.random.choice(
-            ['movie', 'series', 'entertainment'], p=[0.5, 0.3, 0.2]
-        )
+        if day == 'weekend':
+            pt = np.random.choice(
+                ['movie', 'series', 'entertainment'], p=[0.45, 0.35, 0.2]
+            )
+        elif household == 'family':
+            pt = np.random.choice(
+                ['series', 'entertainment', 'movie'], p=[0.45, 0.35, 0.2]
+            )
+        elif gender == 'female':
+            pt = np.random.choice(
+                ['series', 'movie', 'entertainment'], p=[0.45, 0.4, 0.15]
+            )
+        else:
+            pt = np.random.choice(
+                ['movie', 'series', 'entertainment'], p=[0.55, 0.3, 0.15]
+            )
     else:
-        pt = np.random.choice(
-            ['entertainment', 'series', 'news'], p=[0.4, 0.3, 0.3]
-        )
+        if day == 'weekend':
+            pt = np.random.choice(
+                ['entertainment', 'series', 'news'], p=[0.5, 0.35, 0.15]
+            )
+        elif household == 'family':
+            pt = np.random.choice(
+                ['entertainment', 'series', 'news'], p=[0.5, 0.35, 0.15]
+            )
+        elif gender == 'female':
+            pt = np.random.choice(
+                ['series', 'entertainment', 'news'], p=[0.4, 0.35, 0.25]
+            )
+        else:
+            pt = np.random.choice(
+                ['entertainment', 'news', 'series'], p=[0.4, 0.35, 0.25]
+            )
     program_type.append(pt)
 
-# ProgramGenre depends on ProgramType
+# ProgramGenre depends on ProgramType, day type, gender, and household type
 program_genre = []
-for pt in program_type:
+for pt, gender, household, day in zip(
+    program_type, user_gender, household_type, day_type
+):
     if pt == 'news':
         genre = 'news'
     elif pt == 'documentary':
         genre = 'documentary'
     elif pt == 'movie':
-        genre = np.random.choice(
-            ['drama', 'horror', 'comedy', 'romance'], p=[0.4, 0.2, 0.2, 0.2]
-        )
+        if household == 'family':
+            genre = np.random.choice(
+                ['comedy', 'drama', 'romance', 'horror'], p=[0.4, 0.35, 0.2, 0.05]
+            )
+        elif gender == 'female':
+            genre = np.random.choice(
+                ['drama', 'romance', 'comedy', 'horror'], p=[0.45, 0.3, 0.2, 0.05]
+            )
+        else:
+            genre = np.random.choice(
+                ['drama', 'horror', 'comedy', 'romance'], p=[0.35, 0.25, 0.25, 0.15]
+            )
     elif pt == 'series':
-        genre = np.random.choice(
-            ['drama', 'comedy', 'horror'], p=[0.4, 0.4, 0.2]
-        )
+        if household == 'family':
+            genre = np.random.choice(
+                ['comedy', 'drama', 'horror'], p=[0.5, 0.4, 0.1]
+            )
+        elif gender == 'female':
+            genre = np.random.choice(
+                ['drama', 'comedy', 'horror'], p=[0.45, 0.45, 0.1]
+            )
+        else:
+            genre = np.random.choice(
+                ['drama', 'comedy', 'horror'], p=[0.35, 0.4, 0.25]
+            )
     else:  # entertainment
-        genre = 'entertainment'
+        if day == 'weekend':
+            genre = np.random.choice(
+                ['entertainment', 'comedy'], p=[0.7, 0.3]
+            )
+        else:
+            genre = 'entertainment'
     program_genre.append(genre)
 
 # ProgramDuration depends on ProgramType
@@ -99,7 +157,6 @@ df_profile = pd.DataFrame({
     'UserAge': user_age,
     'UserGender': user_gender,
     'HouseholdType': household_type,
-    'TechLevel': tech_level,
     'TimeOfDay': time_of_day,
     'DayType': day_type,
     'ProgramType': program_type,
