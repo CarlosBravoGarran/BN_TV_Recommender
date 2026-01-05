@@ -37,10 +37,6 @@ day_type = np.random.choice(
     ['weekday', 'weekend'], N, p=[0.7, 0.3]
 )
 
-special_period = np.random.choice(
-    ['none', 'christmas', 'summer'], N, p=[0.75, 0.15, 0.10]
-)
-
 # -------------------------
 # CONTENT ATTRIBUTES
 # -------------------------
@@ -106,7 +102,6 @@ df_profile = pd.DataFrame({
     'TechLevel': tech_level,
     'TimeOfDay': time_of_day,
     'DayType': day_type,
-    'SpecialPeriod': special_period,
     'ProgramType': program_type,
     'ProgramGenre': program_genre,
     'ProgramDuration': program_duration
