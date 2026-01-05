@@ -1,119 +1,183 @@
-"""graph_builder.py
+"""
+graph_builder.py
 
-Utilities to build a Bayesian Network (structure + CPDs) from a CSV and
-save/visualize the result.
-This module groups the creation/fitting logic from the original `graph_gen.py`
-so it can be reused from other scripts (e.g., inference).
+Utilities to build a Bayesian Network (structure + CPDs) from a CSV dataset
+(ProfileConsumption) using Hill Climbing and BDeu.
+
+This module:
+- Learns a population-level BN structure
+- Applies semantic constraints (domain knowledge)
+- Fits CPDs using Bayesian estimation
+- Saves edges, CPDs and the full model
+- Visualizes the learned graph
+
+This BN represents user profile + context → content attributes.
 """
 
 import pandas as pd
-from pgmpy.estimators import HillClimbSearch, BayesianEstimator, BDeu
+from pgmpy.estimators import HillClimbSearch, BayesianEstimator, BDeu, BIC, K2
 from pgmpy.models import DiscreteBayesianNetwork
 import networkx as nx
 import matplotlib.pyplot as plt
 import pickle
 
 
+# ============================================================================
+# DATA LOADING
+# ============================================================================
+
 def load_data(path: str) -> pd.DataFrame:
-    """Load the dataset from a CSV and return a DataFrame."""
+    """Load the dataset from a CSV file."""
     return pd.read_csv(path)
 
 
+# ============================================================================
+# STRUCTURE LEARNING
+# ============================================================================
+
 def learn_structure(df: pd.DataFrame):
-    """Learn the structure using Hill Climb and BDeu.
-    Returns the model object (pgmpy networkx.DiGraph-like) with the edges.
-    """
-    hill_climb = HillClimbSearch(df)
-    best_structure = hill_climb.estimate(scoring_method=BDeu(df, equivalent_sample_size=100))
-    return best_structure
+    BN_COLUMNS = [
+        'UserAge',
+        'UserGender',
+        'HouseholdType',
+        'TimeOfDay',
+        'DayType',
+        'ProgramType',
+        'ProgramGenre',
+        'ProgramDuration',
+    ]
+
+    df_bn = df[BN_COLUMNS]
+
+    hill_climb = HillClimbSearch(df_bn)
+    learned_structure = hill_climb.estimate(
+        scoring_method=BDeu(df_bn, equivalent_sample_size=100)
+    )
+
+    edges = list(learned_structure.edges())
+
+    return edges, df_bn
 
 
-def save_edges(best_structure, path: str = "best_model_edges.csv") -> None:
-    """Save the best model edges to a CSV (source,target)."""
-    with open(path, "w", encoding="utf-8") as f:
-        f.write("source,target\n")
-        for source, target in best_structure.edges():
-            f.write(f"{source},{target}\n")
-
+# ============================================================================
+# MODEL BUILDING & FITTING
+# ============================================================================
 
 def build_and_fit_model(
-    csv_path: str = "tv_bn_dataset.csv",
-    save_edges_path: str = "best_model_edges.csv",
-    save_model_path: str = "model.pkl",
+    csv_path: str = "main/consumers_profile.csv",
+    save_edges_path: str = "main/outputs/best_model_edges.csv",
+    save_model_path: str = "main/outputs/bn_model.pkl",
+    save_cpds_path: str = "main/outputs/model_cpds.txt",
     prior_type: str = "BDeu",
     equivalent_sample_size: int = 100,
     visualize: bool = True,
-) -> tuple[DiscreteBayesianNetwork, pd.DataFrame]:
-    """Full pipeline: load data, learn structure, build model, fit CPDs.
-    Optionally saves edges and the model (pickle) and visualizes the network.
-    Returns (model, data_frame).
+):
     """
-    data_frame = load_data(csv_path)
-    best_structure = learn_structure(data_frame)
+    Full pipeline:
+    - Load dataset
+    - Learn BN structure
+    - Build DiscreteBayesianNetwork
+    - Fit CPDs using Bayesian estimation
+    - Save edges, model and CPDs
+    - Optionally visualize the graph
+    """
+
+    df = load_data(csv_path)
+
+    edges, df_bn = learn_structure(df)
 
     if save_edges_path:
-        save_edges(best_structure, save_edges_path)
+        save_edges(edges, save_edges_path)
 
-    model = DiscreteBayesianNetwork(best_structure.edges())
+    model = DiscreteBayesianNetwork(edges)
+
+
+    # Fit CPDs
     model.fit(
-        data_frame,
+        df_bn,
         estimator=BayesianEstimator,
         prior_type=prior_type,
         equivalent_sample_size=equivalent_sample_size,
     )
 
+    assert model.check_model(), "Model is invalid!"
+
+    # Save model
     if save_model_path:
         save_model(model, save_model_path)
 
+    # Save CPDs
+    if save_cpds_path:
+        save_cpds_to_text(model, save_cpds_path)
+
+    # Visualize
     if visualize:
         visualize_model(model)
 
-    return model, data_frame
+    return model, df_bn
 
 
-def visualize_model(model: DiscreteBayesianNetwork, figsize=(10, 8)) -> None:
-    """Draw the network using networkx/matplotlib.
-    It does not display the figure if running without a display; caller decides.
-    """
+# ============================================================================
+# VISUALIZATION
+# ============================================================================
+
+def visualize_model(model: DiscreteBayesianNetwork, figsize=(12, 9)) -> None:
+    """Visualize the Bayesian Network using networkx and matplotlib."""
+
     graph = nx.DiGraph()
     graph.add_edges_from(model.edges())
 
     plt.figure(figsize=figsize)
     pos = nx.spring_layout(graph, seed=42)
+
     nx.draw(
         graph,
         pos,
         with_labels=True,
-        node_size=1000,
-        node_color="skyblue",
+        node_size=1400,
+        node_color="lightblue",
         font_size=10,
         arrowsize=20,
         edgecolors="black",
     )
-    plt.title("Automatically learned Bayesian Network", fontsize=14)
+
+    plt.title("Learned Bayesian Network (Profile → Content)", fontsize=14)
+    plt.tight_layout()
+
     try:
         plt.show()
     except Exception:
         pass
 
 
+# ============================================================================
+# SAVE / LOAD UTILITIES
+# ============================================================================
+
+def save_edges(edges, path: str) -> None:
+    """Save learned edges to CSV."""
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("source,target\n")
+        for source, target in edges:
+            f.write(f"{source},{target}\n")
+
+
 def save_model(model: DiscreteBayesianNetwork, path: str) -> None:
-    """Save the model to a file using pickle."""
+    """Save the BN model using pickle."""
     with open(path, "wb") as f:
         pickle.dump(model, f)
 
 
 def load_model(path: str) -> DiscreteBayesianNetwork:
-    """Load a model saved with `save_model`."""
+    """Load a previously saved BN model."""
     with open(path, "rb") as f:
-        model = pickle.load(f)
-    return model
+        return pickle.load(f)
 
 
-def save_cpds_to_text(model, path: str = "model_cpds.txt") -> None:
-    """Save all CPDs (conditional probability tables) to a single text file."""
+def save_cpds_to_text(model: DiscreteBayesianNetwork, path: str) -> None:
+    """Save all CPDs to a readable text file."""
     with open(path, "w", encoding="utf-8") as f:
-        f.write("Conditional probability tables (CPDs)\n")
+        f.write("Conditional Probability Tables (CPDs)\n")
         f.write("=" * 80 + "\n\n")
 
         for cpd in model.get_cpds():
@@ -124,7 +188,12 @@ def save_cpds_to_text(model, path: str = "model_cpds.txt") -> None:
     print(f"CPDs saved to '{path}'")
 
 
+# ============================================================================
+# MAIN
+# ============================================================================
+
 if __name__ == "__main__":
-    model, data_frame = build_and_fit_model(csv_path="main/tv_bn_dataset.csv")
-    save_cpds_to_text(model, path="model_cpds.txt")
-    
+    model, df_bn = build_and_fit_model(
+        csv_path="main/consumers_profile.csv",
+        visualize=True,
+    )
