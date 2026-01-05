@@ -20,6 +20,7 @@ from pgmpy.models import DiscreteBayesianNetwork
 import networkx as nx
 import matplotlib.pyplot as plt
 import pickle
+from pgmpy.estimators import ExpertKnowledge
 
 
 # ============================================================================
@@ -34,6 +35,58 @@ def load_data(path: str) -> pd.DataFrame:
 # ============================================================================
 # STRUCTURE LEARNING
 # ============================================================================
+
+WHITELIST = [
+    ("UserAge", "ProgramType"),
+    ("UserGender", "ProgramType"),
+    ("HouseholdType", "ProgramType"),
+    ("TimeOfDay", "ProgramType"),
+    ("DayType", "ProgramType"),
+    ("ProgramType", "ProgramGenre"),
+    ("ProgramType", "ProgramDuration"),
+]
+
+BLACKLIST = []
+
+PROFILE_CONTEXT = [
+    "UserAge",
+    "UserGender",
+    "HouseholdType",
+    "TimeOfDay",
+    "DayType",
+]
+
+CONTENT = [
+    "ProgramType",
+    "ProgramGenre",
+    "ProgramDuration",
+]
+
+# Nada apunta a perfil/contexto
+for target in PROFILE_CONTEXT:
+    for source in PROFILE_CONTEXT + CONTENT:
+        if source != target:
+            BLACKLIST.append((source, target))
+
+# ProgramDuration no causa nada
+for node in PROFILE_CONTEXT + CONTENT:
+    BLACKLIST.append(("ProgramDuration", node))
+
+
+def learn_structure_restricted(df: pd.DataFrame):
+    hill_climb = HillClimbSearch(df)
+
+    expert_knowledge = ExpertKnowledge(
+        required_edges=WHITELIST,
+        forbidden_edges=BLACKLIST,
+    )
+
+    structure = hill_climb.estimate(
+        scoring_method=BDeu(df, equivalent_sample_size=100),
+        expert_knowledge=expert_knowledge,
+    )
+
+    return list(structure.edges())
 
 def learn_structure(df: pd.DataFrame):
     BN_COLUMNS = [
@@ -65,8 +118,8 @@ def learn_structure(df: pd.DataFrame):
 
 def build_and_fit_model(
     csv_path: str = "main/consumers_profile.csv",
-    save_edges_path: str = "main/outputs/best_model_edges.csv",
-    save_model_path: str = "main/outputs/bn_model.pkl",
+    save_edges_path: str = "main/outputs/model_edges.csv",
+    save_model_path: str = "main/outputs/model.pkl",
     save_cpds_path: str = "main/outputs/model_cpds.txt",
     prior_type: str = "BDeu",
     equivalent_sample_size: int = 100,
@@ -84,7 +137,20 @@ def build_and_fit_model(
 
     df = load_data(csv_path)
 
-    edges, df_bn = learn_structure(df)
+    BN_COLUMNS = [
+    'UserAge',
+    'UserGender',
+    'HouseholdType',
+    'TimeOfDay',
+    'DayType',
+    'ProgramType',
+    'ProgramGenre',
+    'ProgramDuration',
+]
+
+    df_bn = df[BN_COLUMNS]
+    edges = learn_structure_restricted(df_bn)
+
 
     if save_edges_path:
         save_edges(edges, save_edges_path)
