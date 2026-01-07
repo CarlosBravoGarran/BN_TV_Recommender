@@ -2,7 +2,7 @@
 graph_builder.py
 
 Utilities to build a Bayesian Network (structure + CPDs) from a CSV dataset
-(ProfileConsumption) using Hill Climbing and BDeu.
+(ConsumersProfile) using Hill Climbing and BDeu.
 
 This module:
 - Learns a population-level BN structure
