@@ -2,6 +2,7 @@ import json
 import os
 import logging
 from pathlib import Path
+from datetime import datetime
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -109,34 +110,49 @@ No añadas texto fuera del JSON.
 # Attribute extraction prompt
 
 EXTRACTION_PROMPT = """
-Eres un modelo extractor. Devuelve SOLO un JSON válido con estos campos:
+Eres un modelo extractor. Devuelve SOLO un JSON válido con estos campos,
+alineados exactamente con los nodos de una Red Bayesiana:
 
 {
- "Hora": ...,
- "DiaSemana": ...,
- "GeneroUsuario": ...,
- "EdadUsuario": ...,
- "DuracionPrograma": ...,
- "TipoEmision": ...,
- "InteresPrevio": ...,
- "PopularidadPrograma": ...
+ "UserAge": ...,
+ "UserGender": ...,
+ "HouseholdType": ...,
+ "TimeOfDay": ...,
+ "DayType": ...,
+ "ProgramType": ...,
+ "ProgramGenre": ...,
+ "ProgramDuration": ...
 }
 
 Reglas:
-- Si no se menciona algo, usa null.
-- No añadas texto antes ni después del JSON.
-- No incluyas explicaciones. 
-- No uses markdown. 
-- Para la hora y día coge el los actuales del sistema si no se mencionan. 
-- No confundas el número de la edad con la hora ni con la duración del programa.
-- La edad clasifícala en rangos: joven (18-35), adulto (36-55), mayor (56+). 
-- Duración del programa en minutos: corta (<30), media (30-60), larga (60+) 
-- Si indican el tipo de programa (serie, película, documental, etc) úsalo para la duración del programa. 
-- GéneroUsuario: "hombre" o "mujer" 
-- Hora: "mañana" (7:00-12:00), "tarde" (12:00-20:00), "noche" (20:00-7:00)
-- Día: "laboral" o "fin_semana" 
-- TipoEmision: "bajo_demanda", "diferido", "directo"
+- Si no se menciona un atributo, usa null.
+- No añadas texto fuera del JSON.
+- No uses markdown.
+- Usa EXACTAMENTE los nombres de los campos indicados.
+
+Convenciones:
+- UserAge: "young" (18-35), "adult" (36-55), "senior" (56+)
+- UserGender: "male" | "female"
+- HouseholdType: "single" | "couple" | "family"
+
+- TimeOfDay:
+  - "morning" (07:00-12:00)
+  - "afternoon" (12:00-20:00)
+  - "night" (20:00-07:00)
+
+- DayType: "weekday" | "weekend"
+
+- ProgramType: "movie" | "series" | "news" | "documentary" | "entertainment"
+- ProgramGenre: "comedy" | "drama" | "horror" | "romance" | "news" | "documentary" | "entertainment"
+- ProgramDuration:
+  - "short" (<30 min)
+  - "medium" (30-60 min)
+  - "long" (>60 min)
+
+Si el usuario menciona un tipo de programa pero no la duración, infiere la duración típica.
+Si no hay información suficiente, usa null.
 """
+
 
 # Intent classifier function
 
@@ -213,6 +229,24 @@ def converse(user_message, state, history=None):
 
     return response.choices[0].message.content
 
+def get_time_daytype():
+    now = datetime.now()
+    hour = now.hour
+    weekday = now.weekday()
+
+    if 7 <= hour < 12:
+        time_of_day = "morning"
+    elif 12 <= hour < 20:
+        time_of_day = "afternoon"
+    else:
+        time_of_day = "night"
+
+    if weekday < 5:
+        day_type = "weekday"
+    else:
+        day_type = "weekend"
+
+    return time_of_day, day_type
 
 # MAIN LOOP
 
@@ -231,7 +265,7 @@ if __name__ == "__main__":
     print("TV Assistant. Type 'exit' to quit.\n")
 
     model = load_model("main/outputs/model.pkl")
-    cpt_counts = initialize_cpt_counts(model)
+    #cpt_counts = initialize_cpt_counts(model)
 
     while True:
         mensaje = input("User: ")
@@ -248,19 +282,25 @@ if __name__ == "__main__":
 
         if intent == "RECOMMEND":
             atributes = extract_attributes_llm(mensaje)
+
+            time_of_day, day_type = get_time_daytype()
+            
+            atributes["TimeOfDay"] = time_of_day
+            atributes["DayType"] = day_type
+
             state["atributes_bn"] = atributes
             state["candidates"] = infer_with_bn(state, model)
 
         elif intent == "ALTERNATIVE":
             state["user_feedback"] = "rejected"
-            apply_feedback(model, cpt_counts, state)
+           # apply_feedback(model, cpt_counts, state)
 
         elif intent == "FEEDBACK_POS":
             state["user_feedback"] = "accepted"
-            apply_feedback(model, cpt_counts, state)
+            #apply_feedback(model, cpt_counts, state)
         elif intent == "FEEDBACK_NEG":
             state["user_feedback"] = "rejected"
-            apply_feedback(model, cpt_counts, state)
+            #apply_feedback(model, cpt_counts, state)
 
         elif intent == "SMALLTALK":
             pass  # do not modify BN
