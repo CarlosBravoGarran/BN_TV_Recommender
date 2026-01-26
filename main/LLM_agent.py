@@ -200,11 +200,11 @@ def infer_with_bn(state: dict, model) -> dict:
         print(colorize("Not enough attributes for BN inference.", BN_LOG_COLOR))
         return {}
 
-    # 1️⃣ Infer ProgramType
+    # Infer ProgramType
     type_recs = recommend_type(attrs, model)
     chosen_type = type_recs[0][0]
 
-    # 2️⃣ Infer ProgramGenre conditioned on ProgramType
+    # Infer ProgramGenre conditioned on ProgramType
     attrs_with_type = dict(attrs)
     attrs_with_type["ProgramType"] = chosen_type
 
