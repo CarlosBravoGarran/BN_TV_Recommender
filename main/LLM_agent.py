@@ -52,6 +52,7 @@ client = OpenAI(api_key=api_key)
 
 # SYSTEM PROMPTS
 
+
 SYSTEM_PROMPT = """
 Eres un asistente de televisión diseñado para ayudar a personas mayores a decidir qué ver.
 Tu comportamiento depende del state que recibirás en cada turno.
@@ -153,6 +154,91 @@ Si el usuario menciona un tipo de programa pero no la duración, infiere la dura
 Si no hay información suficiente, usa null.
 """
 
+# Intent classifier prompt
+
+INTENT_PROMPT = """
+Eres un clasificador de intención. Devuelve SOLO un JSON válido:
+
+{
+  "intent": "RECOMMEND" | "ALTERNATIVE" | "FEEDBACK_POS" | "FEEDBACK_NEG" | "SMALLTALK" | "OTHER"
+}
+
+Definiciones:
+- RECOMMEND: el usuario pide qué ver o una sugerencia.
+- ALTERNATIVE: el usuario pide otra opción o rechaza la anterior.
+- FEEDBACK_POS: el usuario acepta la recomendación.
+- FEEDBACK_NEG: el usuario rechaza explícitamente la recomendación.
+- SMALLTALK: saludo, agradecimiento o charla trivial.
+- OTHER: cualquier otro caso.
+
+No añadas texto fuera del JSON.
+"""
+
+
+# Attribute extraction prompt
+
+EXTRACTION_PROMPT = """
+Eres un modelo extractor de atributos para una Red Bayesiana.
+Devuelve SOLO un JSON válido con los siguientes campos EXACTOS:
+
+{
+  "UserAge": ...,
+  "UserGender": ...,
+  "HouseholdType": ...,
+  "TimeOfDay": ...,
+  "DayType": ...,
+  "ProgramType": ...,
+  "ProgramGenre": ...,
+  "ProgramDuration": ...
+}
+
+Reglas estrictas:
+- Si un atributo no se menciona explícitamente, usa null.
+- No inventes valores.
+- No añadas texto fuera del JSON.
+- No uses markdown.
+- Usa EXACTAMENTE los nombres de los campos indicados.
+
+Convenciones de valores:
+
+UserAge:
+- "young" (18-35)
+- "adult" (36-55)
+- "senior" (56+)
+
+UserGender:
+- "male"
+- "female"
+
+HouseholdType:
+- "single"
+- "couple"
+- "family"
+
+TimeOfDay:
+- "morning" (07:00-12:00)
+- "afternoon" (12:00-20:00)
+- "night" (20:00-07:00)
+
+DayType:
+- "weekday"
+- "weekend"
+
+ProgramType:
+- "movie", "series", "news", "documentary", "entertainment"
+
+ProgramGenre:
+- "comedy", "drama", "horror", "romance", "news", "documentary", "entertainment"
+
+ProgramDuration:
+- "short" (<30 min)
+- "medium" (30-60 min)
+- "long" (>60 min)
+
+Notas:
+- Si el usuario menciona un tipo de programa pero no la duración, deja ProgramDuration en null.
+- No deduzcas género ni duración salvo que se indiquen explícitamente.
+"""
 
 # Intent classifier function
 
@@ -203,6 +289,7 @@ def infer_with_bn(state: dict, model) -> dict:
     # Infer ProgramType
     type_recs = recommend_type(attrs, model)
     chosen_type = type_recs[0][0]
+    print(colorize(f"Type recommendations: {[t[0] for t in type_recs]}", BN_LOG_COLOR))
 
     # Infer ProgramGenre conditioned on ProgramType
     attrs_with_type = dict(attrs)
@@ -210,6 +297,7 @@ def infer_with_bn(state: dict, model) -> dict:
 
     genre_recs = recommend_gender(attrs_with_type, model)
     chosen_genre = genre_recs[0][0]
+    print(colorize(f"Genre recommendations: {[t[0] for t in genre_recs]}", BN_LOG_COLOR))
 
     print(colorize(
         f"BN Type: {chosen_type} | Genre: {chosen_genre}",
