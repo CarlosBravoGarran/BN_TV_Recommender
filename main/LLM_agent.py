@@ -307,8 +307,8 @@ def infer_with_bn(state: dict, model) -> dict:
     return {
         "ProgramType": chosen_type,
         "ProgramGenre": chosen_genre,
-        "type_ranking": type_recs,
-        "genre_ranking": genre_recs,
+        "type_ranking": [t[0] for t in type_recs],
+        "genre_ranking": [g[0] for g in genre_recs],
     }
 
 
