@@ -7,7 +7,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from bn_recommender import recommend_gender
+from bn_recommender import recommend_gender, recommend_type
 from graph_builder import load_model
 from feedback import initialize_cpt_counts, apply_feedback
 
@@ -73,11 +73,11 @@ Tu tarea es:
 3. Generar un mensaje conversacional claro y amable.
 4. No inventar programas que no existan.
 5. SIEMPRE usar los candidatos del state si existen.
-6. Si no hay candidatos, recomendar por género ("comedia", "documental", etc).
-7. Si el usuario ha rechazado algo, ofrecer una alternativa distinta.
-8. Recomienda solamente un género o título a la vez.
-9. Responder SIEMPRE con un JSON con los campos:
-
+6. De entre los candidatos, elegir en orden (primero los más probables según el BN).
+7. Si no hay candidatos, recomendar por género ("comedia", "documental", etc).
+8. Si el usuario ha rechazado algo, ofrecer una alternativa distinta.
+9. Recomienda solamente un género o título a la vez.
+10. Responder SIEMPRE con un JSON con los campos:
 {
  "action": "RECOMMEND" | "ASK" | "ALTERNATIVE" | "SMALLTALK" | "FEEDBACK",
  "message": "mensaje conversacional para el usuario",
@@ -194,18 +194,35 @@ def recommend_by_genre(state: dict) -> dict:
 
     return filtered
 
-def infer_with_bn(state: dict, model) -> list:
-
+def infer_with_bn(state: dict, model) -> dict:
     attrs = recommend_by_genre(state)
     if not attrs:
         print(colorize("Not enough attributes for BN inference.", BN_LOG_COLOR))
-        return []
+        return {}
 
-    recommendations = recommend_gender(attrs, model)
-    sorted_items = [g for g, _ in recommendations]
+    # 1️⃣ Infer ProgramType
+    type_recs = recommend_type(attrs, model)
+    chosen_type = type_recs[0][0]
 
-    print(colorize(f"BN Recommendations: {sorted_items}", BN_LOG_COLOR))
-    return sorted_items
+    # 2️⃣ Infer ProgramGenre conditioned on ProgramType
+    attrs_with_type = dict(attrs)
+    attrs_with_type["ProgramType"] = chosen_type
+
+    genre_recs = recommend_gender(attrs_with_type, model)
+    chosen_genre = genre_recs[0][0]
+
+    print(colorize(
+        f"BN Type: {chosen_type} | Genre: {chosen_genre}",
+        BN_LOG_COLOR
+    ))
+
+    return {
+        "ProgramType": chosen_type,
+        "ProgramGenre": chosen_genre,
+        "type_ranking": type_recs,
+        "genre_ranking": genre_recs,
+    }
+
 
 # Conversational LLM
 
@@ -257,15 +274,16 @@ if __name__ == "__main__":
 
     state = {
         "atributes_bn": {},
-        "candidates": [],
-        "last_recommendation": None,
+        "candidates": {},
+        "last_recommendation": None,  # ahora será un dict
         "user_feedback": None
     }
+
 
     print("TV Assistant. Type 'exit' to quit.\n")
 
     model = load_model("main/outputs/model.pkl")
-    cpt_counts = initialize_cpt_counts(model)
+    #cpt_counts = initialize_cpt_counts(model)
 
     while True:
         mensaje = input("User: ")
@@ -289,18 +307,26 @@ if __name__ == "__main__":
             atributes["DayType"] = day_type
 
             state["atributes_bn"] = atributes
-            state["candidates"] = infer_with_bn(state, model)
+
+            bn_result = infer_with_bn(state, model)
+
+            state["candidates"] = bn_result
+            state["last_recommendation"] = {
+                "ProgramType": bn_result["ProgramType"],
+                "ProgramGenre": bn_result["ProgramGenre"]
+            }
+
 
         elif intent == "ALTERNATIVE":
             state["user_feedback"] = "rejected"
-            apply_feedback(model, cpt_counts, state)
+            #apply_feedback(model, cpt_counts, state)
 
         elif intent == "FEEDBACK_POS":
             state["user_feedback"] = "accepted"
-            apply_feedback(model, cpt_counts, state)
+            #apply_feedback(model, cpt_counts, state)
         elif intent == "FEEDBACK_NEG":
             state["user_feedback"] = "rejected"
-            apply_feedback(model, cpt_counts, state)
+            #apply_feedback(model, cpt_counts, state)
 
         elif intent == "SMALLTALK":
             pass  # do not modify BN
@@ -333,8 +359,8 @@ if __name__ == "__main__":
         history.append({"role": "user", "content": mensaje})
         history.append({"role": "assistant", "content": message})
 
-        if item:
-            state["last_recommendation"] = item
+        # if item:
+        #     state["last_recommendation"] = item
 
         if action == "ALTERNATIVE":
             state["user_feedback"] = "rejected"
