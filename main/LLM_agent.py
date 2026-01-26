@@ -447,9 +447,6 @@ if __name__ == "__main__":
         history.append({"role": "user", "content": mensaje})
         history.append({"role": "assistant", "content": message})
 
-        # if item:
-        #     state["last_recommendation"] = item
-
         if action == "ALTERNATIVE":
             state["user_feedback"] = "rejected"
         elif action == "RECOMMEND":
