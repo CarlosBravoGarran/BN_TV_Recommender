@@ -9,7 +9,7 @@ from openai import OpenAI
 
 from bn_recommender import recommend_gender, recommend_type
 from graph_builder import load_model
-from feedback import initialize_cpt_counts, apply_feedback
+from feedback import initialize_cpt_counts, apply_feedback, load_cpt_counts, save_cpt_counts
 
 # Logging
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -363,15 +363,24 @@ if __name__ == "__main__":
     state = {
         "atributes_bn": {},
         "candidates": {},
-        "last_recommendation": None,  # ahora será un dict
+        "last_recommendation": None,
         "user_feedback": None
     }
-
 
     print("TV Assistant. Type 'exit' to quit.\n")
 
     model = load_model("main/outputs/model.pkl")
-    #cpt_counts = initialize_cpt_counts(model)
+    
+    # Initialize CPT counts
+    cpt_counts = initialize_cpt_counts(model, virtual_sample_size=100)
+    
+    # Load previous counts if they exist
+    counts_path = Path(__file__).parent / "cpt_counts.json"
+    if counts_path.exists():
+        try:
+            cpt_counts = load_cpt_counts(counts_path)
+        except Exception as e:
+            print(f"⚠️  Could not load previous counts: {e}")
 
     while True:
         mensaje = input("User: ")
@@ -379,23 +388,18 @@ if __name__ == "__main__":
         if mensaje.lower().strip() == "exit":
             break
 
-        # 1) Classify intent
         intent = classify_intent(mensaje)
         intent_msg = f"Detected intent: {intent}"
         print(colorize(intent_msg, INTENT_COLORS.get(intent, "")))
 
-        # 2) Logic based on intent
-
         if intent == "RECOMMEND":
             atributes = extract_attributes_llm(mensaje)
-
             time_of_day, day_type = get_time_daytype()
             
             atributes["TimeOfDay"] = time_of_day
             atributes["DayType"] = day_type
 
             state["atributes_bn"] = atributes
-
             bn_result = infer_with_bn(state, model)
 
             state["candidates"] = bn_result
@@ -403,29 +407,28 @@ if __name__ == "__main__":
                 "ProgramType": bn_result["ProgramType"],
                 "ProgramGenre": bn_result["ProgramGenre"]
             }
-
+            # Reset feedback for new recommendation
+            state["user_feedback"] = None
 
         elif intent == "ALTERNATIVE":
             state["user_feedback"] = "rejected"
-            #apply_feedback(model, cpt_counts, state)
+            # Apply feedback
+            apply_feedback(model, cpt_counts, state, learning_rate=50)
 
         elif intent == "FEEDBACK_POS":
             state["user_feedback"] = "accepted"
-            #apply_feedback(model, cpt_counts, state)
+            # Apply feedback
+            apply_feedback(model, cpt_counts, state, learning_rate=50)
+            
         elif intent == "FEEDBACK_NEG":
             state["user_feedback"] = "rejected"
-            #apply_feedback(model, cpt_counts, state)
+            # Apply feedback
+            apply_feedback(model, cpt_counts, state, learning_rate=50)
 
-        elif intent == "SMALLTALK":
-            pass  # do not modify BN
+        elif intent in ("SMALLTALK", "OTHER"):
+            pass
 
-        elif intent == "OTHER":
-            pass  # do not modify BN
-
-        # Save state
         states_log.append(json.loads(json.dumps(state)))
-
-        # 3) Final conversation
 
         raw_response = converse(mensaje, state, history)
 
@@ -447,15 +450,10 @@ if __name__ == "__main__":
         history.append({"role": "user", "content": mensaje})
         history.append({"role": "assistant", "content": message})
 
-        if action == "ALTERNATIVE":
-            state["user_feedback"] = "rejected"
-        elif action == "RECOMMEND":
-            state["user_feedback"] = None
-
-    # Final state save
-
+    # ✅ GUARDAR COUNTS AL SALIR
+    save_cpt_counts(cpt_counts, counts_path)
+    
     save_path = Path(__file__).parent / "states.json"
-
     with open(save_path, "w", encoding="utf-8") as f:
         json.dump(states_log, f, indent=2, ensure_ascii=False)
 
