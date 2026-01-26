@@ -1,16 +1,16 @@
 from collections import defaultdict
 import itertools
-import numpy as np
 from pgmpy.factors.discrete import TabularCPD
 
-from graph_builder import load_model
 
-
+# ============================================================================
 # Initialize counts from existing CPDs
+# ============================================================================
 
 def initialize_cpt_counts(model, virtual_sample_size=100):
     """
-    Convert model CPDs into initial in-memory counts.
+    Convert model CPDs into initial in-memory counts
+    using a virtual sample size for smoothing.
     """
     cpt_counts = {}
 
@@ -23,7 +23,9 @@ def initialize_cpt_counts(model, virtual_sample_size=100):
         values = cpd.values
 
         for idx, state in enumerate(state_names[variable]):
-            for parent_idx in np.ndindex(values.shape[1:]):
+            for parent_idx in itertools.product(
+                *[range(len(state_names[p])) for p in parents]
+            ):
                 parent_state = tuple(
                     state_names[p][parent_idx[i]]
                     for i, p in enumerate(parents)
@@ -39,7 +41,10 @@ def initialize_cpt_counts(model, virtual_sample_size=100):
 
     return cpt_counts
 
-# Safe reconstruction of CPDs from counts
+
+# ============================================================================
+# Build CPD safely from counts
+# ============================================================================
 
 def build_cpd_from_counts(variable, cpt_info):
     parents = cpt_info["parents"]
@@ -47,16 +52,14 @@ def build_cpd_from_counts(variable, cpt_info):
     counts = cpt_info["counts"]
 
     var_states = state_names[variable]
-
-    # Only valid combinations of parent states.
     parent_states = [state_names[p] for p in parents]
-    valid_parent_combinations = list(itertools.product(*parent_states))
+    parent_combinations = list(itertools.product(*parent_states))
 
     values = []
 
     for v in var_states:
         row = []
-        for parent_state in valid_parent_combinations:
+        for parent_state in parent_combinations:
             total = sum(counts[parent_state].values())
             prob = counts[parent_state][v] / total if total > 0 else 0.0
             row.append(prob)
@@ -72,69 +75,40 @@ def build_cpd_from_counts(variable, cpt_info):
     )
 
 
-# Apply user feedback
+# ============================================================================
+# Apply feedback (MINIMAL VERSION)
+# ============================================================================
 
 def apply_feedback(model, cpt_counts, state):
     """
-    Apply feedback from a state and update affected CPTs.
+    Update RecommendationAccepted | ProgramType
+    using explicit user feedback.
     """
 
     feedback = state.get("user_feedback")
-    if feedback is None:
+    if feedback not in ("accepted", "rejected"):
         return
 
-    # Map feedback to a latent variable.
-    satisfaction = "alta" if feedback == "accepted" else "baja"
+    program_type = state.get("last_recommendation")
+    if program_type is None:
+        return
 
-    bn_attributes = state["atributes_bn"]
-    program_genre = state["last_recommendation"]
+    accepted_state = "yes" if feedback == "accepted" else "no"
 
-    # CPT: Recomendado | Satisfaccion, PopularidadPrograma
+    cpt = cpt_counts.get("RecommendationAccepted")
+    if cpt is None:
+        return
 
-    cpt = cpt_counts["Recomendado"]
-    parent_state = (
-        satisfaction,
-        bn_attributes.get("PopularidadPrograma", "media")
-    )
+    parent_state = (program_type,)
 
-    # Ignore feedback incompatible with the BN.
-    if parent_state in cpt["counts"]:
-        recommended_state = "sí" if feedback == "accepted" else "no"
-        cpt["counts"][parent_state][recommended_state] += 100
+    # Safety check
+    if parent_state not in cpt["counts"]:
+        return
 
-        new_cpd = build_cpd_from_counts("Recomendado", cpt)
-        model.remove_cpds("Recomendado")
-        model.add_cpds(new_cpd)
+    # Increment count
+    cpt["counts"][parent_state][accepted_state] += 500
 
-    cpt = cpt_counts["GeneroPrograma"]
-
-    # Fixed neutral value for InteresPrevio (not learned from feedback).
-    fixed_prior_interest = cpt["state_names"]["InteresPrevio"][0]
-
-    parent_state = (
-        satisfaction,
-        bn_attributes["DuracionPrograma"],
-        bn_attributes.get("TipoEmision", "desconocido"),
-        fixed_prior_interest,
-    )
-
-    if parent_state in cpt["counts"]:
-        cpt["counts"][parent_state][program_genre] += 1
-
-        new_cpd = build_cpd_from_counts("GeneroPrograma", cpt)
-        model.remove_cpds("GeneroPrograma")
-        model.add_cpds(new_cpd)
-
-    model.check_model()
-
-# Execution test
-if __name__ == "__main__":
-    model = load_model("main/outputs/model.pkl")
-    cpt_counts = initialize_cpt_counts(model)
-
-    import json
-    with open("main/states.json", "r", encoding="utf-8") as f:
-        states = json.load(f)
-
-    for state in states:
-        apply_feedback(model, cpt_counts, state)
+    # Rebuild and replace CPD
+    new_cpd = build_cpd_from_counts("RecommendationAccepted", cpt)
+    model.remove_cpds("RecommendationAccepted")
+    model.add_cpds(new_cpd)

@@ -5,48 +5,37 @@ Utilities to build a Bayesian Network (structure + CPDs) from a CSV dataset
 (ConsumersProfile) using Hill Climbing and BDeu.
 
 This module:
-- Learns a population-level BN structure
+- Learns a population-level BN structure (profile + context → content)
 - Applies semantic constraints (domain knowledge)
 - Fits CPDs using Bayesian estimation
 - Saves edges, CPDs and the full model
 - Visualizes the learned graph
 
-This BN represents user profile + context → content attributes.
 """
 
+import pickle
 import pandas as pd
-from pgmpy.estimators import HillClimbSearch, BayesianEstimator, BDeu
-from pgmpy.models import DiscreteBayesianNetwork
 import networkx as nx
 import matplotlib.pyplot as plt
-import pickle
-from pgmpy.estimators import ExpertKnowledge
+
+from pgmpy.models import DiscreteBayesianNetwork
+from pgmpy.estimators import HillClimbSearch, BayesianEstimator, BDeu, ExpertKnowledge
 
 
 # ============================================================================
-# DATA LOADING
+# CONFIG
 # ============================================================================
 
-def load_data(path: str) -> pd.DataFrame:
-    """Load the dataset from a CSV file."""
-    return pd.read_csv(path)
-
-
-# ============================================================================
-# STRUCTURE LEARNING
-# ============================================================================
-
-WHITELIST = [
-    ("UserAge", "ProgramType"),
-    ("UserGender", "ProgramType"),
-    ("HouseholdType", "ProgramType"),
-    ("TimeOfDay", "ProgramType"),
-    ("DayType", "ProgramType"),
-    ("ProgramType", "ProgramGenre"),
-    ("ProgramType", "ProgramDuration"),
+BASE_COLUMNS = [
+    "UserAge",
+    "UserGender",
+    "HouseholdType",
+    "TimeOfDay",
+    "DayType",
+    "ProgramType",
+    "ProgramGenre",
+    "ProgramDuration",
 ]
-
-BLACKLIST = []
 
 PROFILE_CONTEXT = [
     "UserAge",
@@ -62,51 +51,55 @@ CONTENT = [
     "ProgramDuration",
 ]
 
+
+WHITELIST = [
+    ("UserAge", "ProgramType"),
+    ("UserGender", "ProgramType"),
+    ("HouseholdType", "ProgramType"),
+    ("TimeOfDay", "ProgramType"),
+    ("DayType", "ProgramType"),
+    ("ProgramType", "ProgramGenre"),
+    ("ProgramType", "ProgramDuration"),
+]
+
+BLACKLIST = []
 for target in PROFILE_CONTEXT:
-    for source in PROFILE_CONTEXT + CONTENT:
+    for source in BASE_COLUMNS:
         if source != target:
             BLACKLIST.append((source, target))
 
-for node in PROFILE_CONTEXT + CONTENT:
+for node in BASE_COLUMNS:
     BLACKLIST.append(("ProgramDuration", node))
 
 
-def learn_structure_restricted(df: pd.DataFrame):
-    hill_climb = HillClimbSearch(df)
+# ============================================================================
+# DATA LOADING
+# ============================================================================
 
-    expert_knowledge = ExpertKnowledge(
+def load_data(path: str) -> pd.DataFrame:
+    return pd.read_csv(path)
+
+
+# ============================================================================
+# STRUCTURE LEARNING
+# ============================================================================
+
+def learn_structure(df: pd.DataFrame, equivalent_sample_size: int = 100):
+    df_bn = df[BASE_COLUMNS].copy()
+
+    hc = HillClimbSearch(df_bn)
+
+    ek = ExpertKnowledge(
         required_edges=WHITELIST,
         forbidden_edges=BLACKLIST,
     )
 
-    structure = hill_climb.estimate(
-        scoring_method=BDeu(df, equivalent_sample_size=100),
-        expert_knowledge=expert_knowledge,
+    structure = hc.estimate(
+        scoring_method=BDeu(df_bn, equivalent_sample_size=equivalent_sample_size),
+        expert_knowledge=ek,
     )
 
-    return list(structure.edges())
-
-def learn_structure(df: pd.DataFrame):
-    BN_COLUMNS = [
-        'UserAge',
-        'UserGender',
-        'HouseholdType',
-        'TimeOfDay',
-        'DayType',
-        'ProgramType',
-        'ProgramGenre',
-        'ProgramDuration',
-    ]
-
-    df_bn = df[BN_COLUMNS]
-
-    hill_climb = HillClimbSearch(df_bn)
-    learned_structure = hill_climb.estimate(
-        scoring_method=BDeu(df_bn, equivalent_sample_size=100)
-    )
-
-    edges = list(learned_structure.edges())
-
+    edges = list(structure.edges())
     return edges, df_bn
 
 
@@ -123,56 +116,12 @@ def build_and_fit_model(
     equivalent_sample_size: int = 100,
     visualize: bool = False,
 ):
-    """
-    Full pipeline:
-    - Load dataset
-    - Learn BN structure
-    - Build DiscreteBayesianNetwork
-    - Fit CPDs using Bayesian estimation
-    - Save edges, model and CPDs
-    - Optionally visualize the graph
-    """
-
     df = load_data(csv_path)
 
-    BN_COLUMNS = [
-    'UserAge',
-    'UserGender',
-    'HouseholdType',
-    'TimeOfDay',
-    'DayType',
-    'ProgramType',
-    'ProgramGenre',
-    'ProgramDuration',
-]
-
-    df_bn = df[BN_COLUMNS]
-    edges = learn_structure_restricted(df_bn)
-
-
-    if save_edges_path:
-        save_edges(edges, save_edges_path)
+    edges, df_bn = learn_structure(df, equivalent_sample_size=equivalent_sample_size)
 
     model = DiscreteBayesianNetwork(edges)
 
-    FEEDBACK_NODES = [
-        # History
-        "SeenBefore",
-        "PreviousContentType",
-        "PreviousGenre",
-
-        # Feedback
-        "RecommendationAccepted",
-        "UserSatisfaction",
-        "ExplicitFeedback",
-        "WatchRatio",
-        "Abandoned",
-        "RepeatContent",
-    ]
-
-    model.add_nodes_from(FEEDBACK_NODES)
-
-    # Fit CPDs
     model.fit(
         df_bn,
         estimator=BayesianEstimator,
@@ -180,24 +129,21 @@ def build_and_fit_model(
         equivalent_sample_size=equivalent_sample_size,
     )
 
-    # Validate only nodes that have data / CPDs
-    for node in df_bn.columns:
-        assert model.get_cpds(node) is not None, f"Missing CPD for {node}"
+    model.check_model()
 
+    if save_edges_path:
+        save_edges(edges, save_edges_path)
 
-    # Save model
     if save_model_path:
         save_model(model, save_model_path)
 
-    # Save CPDs
     if save_cpds_path:
         save_cpds_to_text(model, save_cpds_path)
 
-    # Visualize
     if visualize:
         visualize_model(model)
 
-    return model, df_bn
+    return model, df_bn, edges
 
 
 # ============================================================================
@@ -205,8 +151,6 @@ def build_and_fit_model(
 # ============================================================================
 
 def visualize_model(model: DiscreteBayesianNetwork, figsize=(12, 9)) -> None:
-    """Visualize the Bayesian Network using networkx and matplotlib."""
-
     graph = nx.DiGraph()
     graph.add_edges_from(model.edges())
 
@@ -219,18 +163,14 @@ def visualize_model(model: DiscreteBayesianNetwork, figsize=(12, 9)) -> None:
         with_labels=True,
         node_size=1400,
         node_color="lightblue",
-        font_size=10,
+        font_size=9,
         arrowsize=20,
         edgecolors="black",
     )
 
-    plt.title("Learned Bayesian Network (Profile → Content)", fontsize=14)
+    plt.title("Learned Bayesian Network (Base: Profile/Context → Content)")
     plt.tight_layout()
-
-    try:
-        plt.show()
-    except Exception:
-        pass
+    plt.show()
 
 
 # ============================================================================
@@ -238,36 +178,30 @@ def visualize_model(model: DiscreteBayesianNetwork, figsize=(12, 9)) -> None:
 # ============================================================================
 
 def save_edges(edges, path: str) -> None:
-    """Save learned edges to CSV."""
     with open(path, "w", encoding="utf-8") as f:
         f.write("source,target\n")
-        for source, target in edges:
-            f.write(f"{source},{target}\n")
+        for s, t in edges:
+            f.write(f"{s},{t}\n")
 
 
 def save_model(model: DiscreteBayesianNetwork, path: str) -> None:
-    """Save the BN model using pickle."""
     with open(path, "wb") as f:
         pickle.dump(model, f)
 
 
 def load_model(path: str) -> DiscreteBayesianNetwork:
-    """Load a previously saved BN model."""
     with open(path, "rb") as f:
         return pickle.load(f)
 
 
 def save_cpds_to_text(model: DiscreteBayesianNetwork, path: str) -> None:
-    """Save all CPDs to a readable text file."""
     with open(path, "w", encoding="utf-8") as f:
         f.write("Conditional Probability Tables (CPDs)\n")
         f.write("=" * 80 + "\n\n")
-
         for cpd in model.get_cpds():
             f.write(f"CPD for {cpd.variable}:\n")
             f.write(str(cpd))
             f.write("\n" + "-" * 80 + "\n")
-
     print(f"CPDs saved to '{path}'")
 
 
@@ -276,7 +210,7 @@ def save_cpds_to_text(model: DiscreteBayesianNetwork, path: str) -> None:
 # ============================================================================
 
 if __name__ == "__main__":
-    model, df_bn = build_and_fit_model(
+    build_and_fit_model(
         csv_path="main/consumers_profile.csv",
         visualize=True,
     )

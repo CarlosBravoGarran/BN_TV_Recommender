@@ -265,7 +265,7 @@ if __name__ == "__main__":
     print("TV Assistant. Type 'exit' to quit.\n")
 
     model = load_model("main/outputs/model.pkl")
-    #cpt_counts = initialize_cpt_counts(model)
+    cpt_counts = initialize_cpt_counts(model)
 
     while True:
         mensaje = input("User: ")
@@ -293,14 +293,14 @@ if __name__ == "__main__":
 
         elif intent == "ALTERNATIVE":
             state["user_feedback"] = "rejected"
-           # apply_feedback(model, cpt_counts, state)
+            apply_feedback(model, cpt_counts, state)
 
         elif intent == "FEEDBACK_POS":
             state["user_feedback"] = "accepted"
-            #apply_feedback(model, cpt_counts, state)
+            apply_feedback(model, cpt_counts, state)
         elif intent == "FEEDBACK_NEG":
             state["user_feedback"] = "rejected"
-            #apply_feedback(model, cpt_counts, state)
+            apply_feedback(model, cpt_counts, state)
 
         elif intent == "SMALLTALK":
             pass  # do not modify BN
