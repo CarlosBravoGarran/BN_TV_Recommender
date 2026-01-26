@@ -116,7 +116,7 @@ def apply_feedback(model, cpt_counts, state, learning_rate=50):
     # Get contextual attributes for conditioning
     attrs = state.get("atributes_bn", {})
     
-    print(f"\n🔄 Applying feedback: {feedback} for Type={program_type}, Genre={program_genre}")
+    print(f"\n Applying feedback: {feedback} for Type={program_type}, Genre={program_genre}")
     
     # ========================================
     # 1. Update ProgramType CPD
