@@ -380,7 +380,7 @@ if __name__ == "__main__":
         try:
             cpt_counts = load_cpt_counts(counts_path)
         except Exception as e:
-            print(f"⚠️  Could not load previous counts: {e}")
+            print(f"Could not load previous counts: {e}")
 
     while True:
         mensaje = input("User: ")
@@ -450,7 +450,7 @@ if __name__ == "__main__":
         history.append({"role": "user", "content": mensaje})
         history.append({"role": "assistant", "content": message})
 
-    # ✅ GUARDAR COUNTS AL SALIR
+    # Save CPT counts
     save_cpt_counts(cpt_counts, counts_path)
     
     save_path = Path(__file__).parent / "states.json"

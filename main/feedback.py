@@ -146,13 +146,13 @@ def update_program_type_cpd(model, cpt_counts, program_type, attrs, feedback, le
     parent_state = build_parent_state(parents, attrs)
     
     if parent_state not in cpt["counts"]:
-        #print(f"⚠️  Parent state {parent_state} not found in ProgramType CPD")
+        #print(f"Parent state {parent_state} not found in ProgramType CPD")
         return
     
     if feedback == "accepted":
         # Reinforce the recommended type
         cpt["counts"][parent_state][program_type] += learning_rate
-        #print(f"✅ Reinforced {program_type} for context {parent_state}")
+        #print(f"Reinforced {program_type} for context {parent_state}")
     
     elif feedback == "rejected":
         # Penalize the recommended type (but don't go below a minimum)
@@ -168,7 +168,7 @@ def update_program_type_cpd(model, cpt_counts, program_type, attrs, feedback, le
         for alt in alternatives:
             cpt["counts"][parent_state][alt] += boost_per_alt
         
-        #print(f"❌ Penalized {program_type}, boosted alternatives for context {parent_state}")
+        #print(f"Penalized {program_type}, boosted alternatives for context {parent_state}")
     
     # Rebuild and replace CPD
     new_cpd = build_cpd_from_counts("ProgramType", cpt)
@@ -191,13 +191,13 @@ def update_program_genre_cpd(model, cpt_counts, program_type, program_genre, att
     parent_state = build_parent_state(parents, attrs_with_type)
     
     if parent_state not in cpt["counts"]:
-        #print(f"⚠️  Parent state {parent_state} not found in ProgramGenre CPD")
+        #print(f"Parent state {parent_state} not found in ProgramGenre CPD")
         return
     
     if feedback == "accepted":
         # Reinforce the recommended genre
         cpt["counts"][parent_state][program_genre] += learning_rate
-        #print(f"✅ Reinforced {program_genre} for Type={program_type}, context={parent_state}")
+        #print(f"Reinforced {program_genre} for Type={program_type}, context={parent_state}")
     
     elif feedback == "rejected":
         # Penalize the recommended genre
@@ -213,7 +213,7 @@ def update_program_genre_cpd(model, cpt_counts, program_type, program_genre, att
         for alt in alternatives:
             cpt["counts"][parent_state][alt] += boost_per_alt
         
-        #print(f"❌ Penalized {program_genre}, boosted alternatives for Type={program_type}")
+        #print(f"Penalized {program_genre}, boosted alternatives for Type={program_type}")
     
     # Rebuild and replace CPD
     new_cpd = build_cpd_from_counts("ProgramGenre", cpt)
@@ -259,7 +259,7 @@ def save_cpt_counts(cpt_counts, filepath):
     with open(filepath, 'w') as f:
         json.dump(serializable, f, indent=2)
     
-    print(f"💾 CPT counts saved to {filepath}")
+    print(f"CPT counts saved to {filepath}")
 
 
 def load_cpt_counts(filepath):
