@@ -275,7 +275,7 @@ def load_cpt_counts(filepath):
     for var, info in data.items():
         counts = defaultdict(lambda: defaultdict(float))
         for k_str, v_dict in info["counts"].items():
-            k_tuple = eval(k_str)  # Convert string back to tuple
+            k_tuple = eval(k_str) 
             counts[k_tuple] = defaultdict(float, v_dict)
         
         cpt_counts[var] = {

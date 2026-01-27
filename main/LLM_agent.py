@@ -375,7 +375,7 @@ if __name__ == "__main__":
     cpt_counts = initialize_cpt_counts(model, virtual_sample_size=100)
     
     # Load previous counts if they exist
-    counts_path = Path(__file__).parent / "cpt_counts.json"
+    counts_path = Path(__file__).parent / "outputs/cpt_counts.json"
     if counts_path.exists():
         try:
             cpt_counts = load_cpt_counts(counts_path)
