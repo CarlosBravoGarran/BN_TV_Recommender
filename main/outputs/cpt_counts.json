@@ -1,0 +1,1303 @@
+{
+  "UserAge": {
+    "parents": [],
+    "state_names": {
+      "UserAge": [
+        "adult",
+        "senior",
+        "young"
+      ]
+    },
+    "counts": {
+      "()": {
+        "adult": 39.73597359735974,
+        "senior": 19.755775577557756,
+        "young": 40.508250825082506
+      }
+    }
+  },
+  "ProgramType": {
+    "parents": [
+      "DayType",
+      "HouseholdType",
+      "TimeOfDay",
+      "UserAge",
+      "UserGender"
+    ],
+    "state_names": {
+      "ProgramType": [
+        "documentary",
+        "entertainment",
+        "movie",
+        "news",
+        "series"
+      ],
+      "DayType": [
+        "weekday",
+        "weekend"
+      ],
+      "HouseholdType": [
+        "couple",
+        "family",
+        "single"
+      ],
+      "TimeOfDay": [
+        "afternoon",
+        "morning",
+        "night"
+      ],
+      "UserAge": [
+        "adult",
+        "senior",
+        "young"
+      ],
+      "UserGender": [
+        "female",
+        "male"
+      ]
+    },
+    "counts": {
+      "('weekday', 'couple', 'afternoon', 'adult', 'female')": {
+        "documentary": 0.08458805616646928,
+        "entertainment": 38.45373033327694,
+        "movie": 0.08458805616646928,
+        "news": 22.923363221113174,
+        "series": 38.45373033327694
+      },
+      "('weekday', 'couple', 'afternoon', 'adult', 'male')": {
+        "documentary": 0.08458805616646928,
+        "entertainment": 39.82405684317374,
+        "movie": 0.08458805616646928,
+        "news": 38.91050583657587,
+        "series": 21.09626120791744
+      },
+      "('weekday', 'couple', 'afternoon', 'senior', 'female')": {
+        "documentary": 24.960405448210324,
+        "entertainment": 0.15837820715869494,
+        "movie": 17.263224580297752,
+        "news": 57.45961355717453,
+        "series": 0.15837820715869494
+      },
+      "('weekday', 'couple', 'afternoon', 'senior', 'male')": {
+        "documentary": 15.265045834994021,
+        "entertainment": 0.19928258270227178,
+        "movie": 15.265045834994021,
+        "news": 69.07134316460741,
+        "series": 0.19928258270227178
+      },
+      "('weekday', 'couple', 'afternoon', 'young', 'female')": {
+        "documentary": 0.07849293563579277,
+        "entertainment": 37.8021978021978,
+        "movie": 0.07849293563579277,
+        "news": 25.93406593406593,
+        "series": 36.106750392464676
+      },
+      "('weekday', 'couple', 'afternoon', 'young', 'male')": {
+        "documentary": 0.08269930532583525,
+        "entertainment": 39.38140919616275,
+        "movie": 0.08269930532583525,
+        "news": 34.91564670856764,
+        "series": 25.537545484617922
+      },
+      "('weekday', 'couple', 'morning', 'adult', 'female')": {
+        "documentary": 0.09500285008550255,
+        "entertainment": 36.51909557286718,
+        "movie": 0.09500285008550255,
+        "news": 23.693710811324337,
+        "series": 39.59718791563746
+      },
+      "('weekday', 'couple', 'morning', 'adult', 'male')": {
+        "documentary": 0.10349824052991098,
+        "entertainment": 33.63692817222107,
+        "movie": 0.10349824052991098,
+        "news": 41.46139515628235,
+        "series": 24.694680190436763
+      },
+      "('weekday', 'couple', 'morning', 'senior', 'female')": {
+        "documentary": 30.89908256880734,
+        "entertainment": 0.18348623853211007,
+        "movie": 19.009174311926607,
+        "news": 49.72477064220183,
+        "series": 0.18348623853211007
+      },
+      "('weekday', 'couple', 'morning', 'senior', 'male')": {
+        "documentary": 21.501390176088975,
+        "entertainment": 0.23169601482854493,
+        "movie": 15.24559777571826,
+        "news": 62.789620018535686,
+        "series": 0.23169601482854493
+      },
+      "('weekday', 'couple', 'morning', 'young', 'female')": {
+        "documentary": 0.10526315789473684,
+        "entertainment": 35.347368421052636,
+        "movie": 0.10526315789473684,
+        "news": 25.11578947368421,
+        "series": 39.32631578947369
+      },
+      "('weekday', 'couple', 'morning', 'young', 'male')": {
+        "documentary": 0.11876484560570072,
+        "entertainment": 40.52256532066508,
+        "movie": 0.11876484560570072,
+        "news": 36.67458432304038,
+        "series": 22.565320665083135
+      },
+      "('weekday', 'couple', 'night', 'adult', 'female')": {
+        "documentary": 0.10708931248661384,
+        "entertainment": 18.03384022274577,
+        "movie": 35.38230884557721,
+        "news": 0.10708931248661384,
+        "series": 46.3696723067038
+      },
+      "('weekday', 'couple', 'night', 'adult', 'male')": {
+        "documentary": 0.1023541453428864,
+        "entertainment": 20.0,
+        "movie": 48.18833162743091,
+        "news": 0.1023541453428864,
+        "series": 31.60696008188332
+      },
+      "('weekday', 'couple', 'night', 'senior', 'female')": {
+        "documentary": 24.619771863117872,
+        "entertainment": 0.2376425855513308,
+        "movie": 9.220532319391635,
+        "news": 65.68441064638783,
+        "series": 0.2376425855513308
+      },
+      "('weekday', 'couple', 'night', 'senior', 'male')": {
+        "documentary": 27.300479720889665,
+        "entertainment": 0.2180549498473615,
+        "movie": 16.703009158307893,
+        "news": 55.56040122110771,
+        "series": 0.2180549498473615
+      },
+      "('weekday', 'couple', 'night', 'young', 'female')": {
+        "documentary": 0.1083423618634886,
+        "entertainment": 15.319609967497291,
+        "movie": 39.30660888407367,
+        "news": 0.1083423618634886,
+        "series": 45.157096424702054
+      },
+      "('weekday', 'couple', 'night', 'young', 'male')": {
+        "documentary": 0.11296882060551285,
+        "entertainment": 15.973791233619519,
+        "movie": 59.28603705377316,
+        "news": 0.11296882060551285,
+        "series": 24.51423407139629
+      },
+      "('weekday', 'family', 'afternoon', 'adult', 'female')": {
+        "documentary": 0.12030798845043308,
+        "entertainment": 45.59672762271415,
+        "movie": 0.12030798845043308,
+        "news": 19.610202117420595,
+        "series": 34.55245428296438
+      },
+      "('weekday', 'family', 'afternoon', 'adult', 'male')": {
+        "documentary": 0.11160714285714284,
+        "entertainment": 51.33928571428571,
+        "movie": 0.11160714285714284,
+        "news": 18.191964285714285,
+        "series": 30.245535714285708
+      },
+      "('weekday', 'family', 'afternoon', 'senior', 'female')": {
+        "documentary": 34.487804878048784,
+        "entertainment": 0.24390243902439024,
+        "movie": 10.78048780487805,
+        "news": 54.243902439024396,
+        "series": 0.24390243902439024
+      },
+      "('weekday', 'family', 'afternoon', 'senior', 'male')": {
+        "documentary": 24.952235384027517,
+        "entertainment": 0.19105846388995032,
+        "movie": 19.793656858998858,
+        "news": 54.87199082919373,
+        "series": 0.19105846388995032
+      },
+      "('weekday', 'family', 'afternoon', 'young', 'female')": {
+        "documentary": 0.10068465565847763,
+        "entertainment": 50.66451872734595,
+        "movie": 0.10068465565847763,
+        "news": 13.14941602899718,
+        "series": 35.98469593233991
+      },
+      "('weekday', 'family', 'afternoon', 'young', 'male')": {
+        "documentary": 0.10292301358583776,
+        "entertainment": 50.123507616303,
+        "movie": 0.10292301358583776,
+        "news": 13.441745574310415,
+        "series": 36.2289007822149
+      },
+      "('weekday', 'family', 'morning', 'adult', 'female')": {
+        "documentary": 0.14590020426028597,
+        "entertainment": 44.26612197257076,
+        "movie": 0.14590020426028597,
+        "news": 16.690983367376717,
+        "series": 38.75109425153195
+      },
+      "('weekday', 'family', 'morning', 'adult', 'male')": {
+        "documentary": 0.15441630636195178,
+        "entertainment": 55.18838789376157,
+        "movie": 0.15441630636195178,
+        "news": 10.160592958616428,
+        "series": 34.342186534898076
+      },
+      "('weekday', 'family', 'morning', 'senior', 'female')": {
+        "documentary": 23.03370786516854,
+        "entertainment": 0.2808988764044944,
+        "movie": 15.449438202247192,
+        "news": 60.95505617977528,
+        "series": 0.2808988764044944
+      },
+      "('weekday', 'family', 'morning', 'senior', 'male')": {
+        "documentary": 21.31707317073171,
+        "entertainment": 0.24390243902439024,
+        "movie": 14.73170731707317,
+        "news": 63.46341463414634,
+        "series": 0.24390243902439024
+      },
+      "('weekday', 'family', 'morning', 'young', 'female')": {
+        "documentary": 0.1352447930754666,
+        "entertainment": 41.033270219096565,
+        "movie": 0.1352447930754666,
+        "news": 21.314579388693534,
+        "series": 37.38166080605897
+      },
+      "('weekday', 'family', 'morning', 'young', 'male')": {
+        "documentary": 0.12109469605231288,
+        "entertainment": 50.47226931460401,
+        "movie": 0.12109469605231288,
+        "news": 13.199321869702105,
+        "series": 36.08621942358924
+      },
+      "('weekday', 'family', 'night', 'adult', 'female')": {
+        "documentary": 0.14943215780035862,
+        "entertainment": 34.040645546921695,
+        "movie": 25.164375373580395,
+        "news": 0.14943215780035862,
+        "series": 40.49611476389719
+      },
+      "('weekday', 'family', 'night', 'adult', 'male')": {
+        "documentary": 0.14823599169878446,
+        "entertainment": 35.369107619329974,
+        "movie": 17.758671805514382,
+        "news": 0.14823599169878446,
+        "series": 46.57574859175808
+      },
+      "('weekday', 'family', 'night', 'senior', 'female')": {
+        "documentary": 24.005394470667564,
+        "entertainment": 0.33715441672285906,
+        "movie": 13.081591368846931,
+        "news": 62.23870532703978,
+        "series": 0.33715441672285906
+      },
+      "('weekday', 'family', 'night', 'senior', 'male')": {
+        "documentary": 23.282674772036476,
+        "entertainment": 0.303951367781155,
+        "movie": 13.434650455927052,
+        "news": 62.67477203647416,
+        "series": 0.303951367781155
+      },
+      "('weekday', 'family', 'night', 'young', 'female')": {
+        "documentary": 0.155714730613516,
+        "entertainment": 43.88041108688882,
+        "movie": 25.381501090003116,
+        "news": 0.155714730613516,
+        "series": 30.42665836188103
+      },
+      "('weekday', 'family', 'night', 'young', 'male')": {
+        "documentary": 0.15837820715869497,
+        "entertainment": 28.38137472283814,
+        "movie": 27.526132404181187,
+        "news": 0.15837820715869497,
+        "series": 43.77573645866329
+      },
+      "('weekday', 'single', 'afternoon', 'adult', 'female')": {
+        "documentary": 0.09906875371507824,
+        "entertainment": 35.942143847830394,
+        "movie": 0.09906875371507824,
+        "news": 25.242718446601938,
+        "series": 38.617000198137504
+      },
+      "('weekday', 'single', 'afternoon', 'adult', 'male')": {
+        "documentary": 0.10962508221881165,
+        "entertainment": 40.36395527296645,
+        "movie": 0.10962508221881165,
+        "news": 35.0361762771322,
+        "series": 24.380618285463708
+      },
+      "('weekday', 'single', 'afternoon', 'senior', 'female')": {
+        "documentary": 29.382239382239383,
+        "entertainment": 0.19305019305019303,
+        "movie": 13.745173745173744,
+        "news": 56.486486486486484,
+        "series": 0.19305019305019303
+      },
+      "('weekday', 'single', 'afternoon', 'senior', 'male')": {
+        "documentary": 28.108869075551386,
+        "entertainment": 0.2346316283435007,
+        "movie": 14.171750351947443,
+        "news": 57.25011731581417,
+        "series": 0.2346316283435007
+      },
+      "('weekday', 'single', 'afternoon', 'young', 'female')": {
+        "documentary": 0.09500285008550255,
+        "entertainment": 38.058141744252325,
+        "movie": 0.09500285008550255,
+        "news": 25.74577237317119,
+        "series": 36.00608018240547
+      },
+      "('weekday', 'single', 'afternoon', 'young', 'male')": {
+        "documentary": 0.12690355329949238,
+        "entertainment": 32.33502538071066,
+        "movie": 0.12690355329949238,
+        "news": 35.076142131979694,
+        "series": 32.33502538071066
+      },
+      "('weekday', 'single', 'morning', 'adult', 'female')": {
+        "documentary": 0.14590020426028597,
+        "entertainment": 33.23606653049314,
+        "movie": 0.14590020426028597,
+        "news": 25.3574555004377,
+        "series": 41.114677560548586
+      },
+      "('weekday', 'single', 'morning', 'adult', 'male')": {
+        "documentary": 0.1597444089456869,
+        "entertainment": 45.87859424920128,
+        "movie": 0.1597444089456869,
+        "news": 33.801916932907346,
+        "series": 20.0
+      },
+      "('weekday', 'single', 'morning', 'senior', 'female')": {
+        "documentary": 30.728476821192057,
+        "entertainment": 0.33112582781456956,
+        "movie": 11.059602649006623,
+        "news": 57.54966887417219,
+        "series": 0.33112582781456956
+      },
+      "('weekday', 'single', 'morning', 'senior', 'male')": {
+        "documentary": 27.46700188560654,
+        "entertainment": 0.3142677561282213,
+        "movie": 5.405405405405405,
+        "news": 66.49905719673161,
+        "series": 0.3142677561282213
+      },
+      "('weekday', 'single', 'morning', 'young', 'female')": {
+        "documentary": 0.1314060446780552,
+        "entertainment": 34.191852825229965,
+        "movie": 0.1314060446780552,
+        "news": 25.676741130091983,
+        "series": 39.86859395532195
+      },
+      "('weekday', 'single', 'morning', 'young', 'male')": {
+        "documentary": 0.14823599169878446,
+        "entertainment": 34.56863326415653,
+        "movie": 0.14823599169878446,
+        "news": 32.167210198636226,
+        "series": 32.96768455380966
+      },
+      "('weekday', 'single', 'night', 'adult', 'female')": {
+        "documentary": 0.14823599169878446,
+        "entertainment": 13.7563000296472,
+        "movie": 38.571005040023714,
+        "news": 0.14823599169878446,
+        "series": 47.37622294693151
+      },
+      "('weekday', 'single', 'night', 'adult', 'male')": {
+        "documentary": 0.1314060446780552,
+        "entertainment": 8.646517739816032,
+        "movie": 63.99474375821288,
+        "news": 0.1314060446780552,
+        "series": 27.09592641261498
+      },
+      "('weekday', 'single', 'night', 'senior', 'female')": {
+        "documentary": 24.57627118644068,
+        "entertainment": 0.26483050847457623,
+        "movie": 14.565677966101696,
+        "news": 60.32838983050848,
+        "series": 0.26483050847457623
+      },
+      "('weekday', 'single', 'night', 'senior', 'male')": {
+        "documentary": 23.576158940397352,
+        "entertainment": 0.33112582781456956,
+        "movie": 18.211920529801326,
+        "news": 57.54966887417219,
+        "series": 0.33112582781456956
+      },
+      "('weekday', 'single', 'night', 'young', 'female')": {
+        "documentary": 0.16846361185983827,
+        "entertainment": 15.633423180592992,
+        "movie": 37.46630727762803,
+        "news": 0.16846361185983827,
+        "series": 46.5633423180593
+      },
+      "('weekday', 'single', 'night', 'young', 'male')": {
+        "documentary": 0.1764913519237557,
+        "entertainment": 14.472290857747968,
+        "movie": 55.453582774444044,
+        "news": 0.1764913519237557,
+        "series": 29.721143663960465
+      },
+      "('weekend', 'couple', 'afternoon', 'adult', 'female')": {
+        "documentary": 0.17992083483267363,
+        "entertainment": 41.95753868297949,
+        "movie": 0.17992083483267363,
+        "news": 15.725080964375676,
+        "series": 41.95753868297949
+      },
+      "('weekend', 'couple', 'afternoon', 'adult', 'male')": {
+        "documentary": 0.201450443190975,
+        "entertainment": 53.505237711522966,
+        "movie": 0.201450443190975,
+        "news": 11.079774375503625,
+        "series": 35.01208702659146
+      },
+      "('weekend', 'couple', 'afternoon', 'senior', 'female')": {
+        "documentary": 24.905374716124147,
+        "entertainment": 0.37850113550340647,
+        "movie": 24.905374716124147,
+        "news": 49.43224829674489,
+        "series": 0.37850113550340647
+      },
+      "('weekend', 'couple', 'afternoon', 'senior', 'male')": {
+        "documentary": 24.00539447066756,
+        "entertainment": 0.337154416722859,
+        "movie": 31.28792987188132,
+        "news": 44.03236682400539,
+        "series": 0.337154416722859
+      },
+      "('weekend', 'couple', 'afternoon', 'young', 'female')": {
+        "documentary": 0.18532246108228317,
+        "entertainment": 50.22238695329874,
+        "movie": 0.18532246108228317,
+        "news": 13.194959229058561,
+        "series": 36.212008895478135
+      },
+      "('weekend', 'couple', 'afternoon', 'young', 'male')": {
+        "documentary": 0.17818959372772628,
+        "entertainment": 49.25160370634355,
+        "movie": 0.17818959372772628,
+        "news": 14.611546685673558,
+        "series": 35.780470420527436
+      },
+      "('weekend', 'couple', 'morning', 'adult', 'female')": {
+        "documentary": 0.24715768660405335,
+        "entertainment": 37.61739990113693,
+        "movie": 0.24715768660405335,
+        "news": 18.93227879387049,
+        "series": 42.95600593178448
+      },
+      "('weekend', 'couple', 'morning', 'adult', 'male')": {
+        "documentary": 0.2288329519450801,
+        "entertainment": 45.94965675057208,
+        "movie": 0.2288329519450801,
+        "news": 16.2929061784897,
+        "series": 37.29977116704806
+      },
+      "('weekend', 'couple', 'morning', 'senior', 'female')": {
+        "documentary": 17.216494845360824,
+        "entertainment": 0.5154639175257731,
+        "movie": 25.567010309278356,
+        "news": 56.18556701030929,
+        "series": 0.5154639175257731
+      },
+      "('weekend', 'couple', 'morning', 'senior', 'male')": {
+        "documentary": 21.179039301310045,
+        "entertainment": 0.5458515283842794,
+        "movie": 44.759825327510924,
+        "news": 32.96943231441048,
+        "series": 0.5458515283842794
+      },
+      "('weekend', 'couple', 'morning', 'young', 'female')": {
+        "documentary": 0.2376425855513308,
+        "entertainment": 51.56844106463878,
+        "movie": 0.2376425855513308,
+        "news": 15.636882129277566,
+        "series": 32.319391634980995
+      },
+      "('weekend', 'couple', 'morning', 'young', 'male')": {
+        "documentary": 0.303951367781155,
+        "entertainment": 54.46808510638298,
+        "movie": 0.303951367781155,
+        "news": 11.793313069908814,
+        "series": 33.130699088145896
+      },
+      "('weekend', 'couple', 'night', 'adult', 'female')": {
+        "documentary": 0.27262813522355506,
+        "entertainment": 20.88331515812432,
+        "movie": 41.49400218102509,
+        "news": 0.27262813522355506,
+        "series": 37.077426390403495
+      },
+      "('weekend', 'couple', 'night', 'adult', 'male')": {
+        "documentary": 0.2346316283435007,
+        "entertainment": 15.438761145002347,
+        "movie": 57.25011731581417,
+        "news": 0.2346316283435007,
+        "series": 26.841858282496485
+      },
+      "('weekend', 'couple', 'night', 'senior', 'female')": {
+        "documentary": 15.491651205936918,
+        "entertainment": 0.4638218923933209,
+        "movie": 28.01484230055658,
+        "news": 55.56586270871985,
+        "series": 0.4638218923933209
+      },
+      "('weekend', 'couple', 'night', 'senior', 'male')": {
+        "documentary": 21.397756686798964,
+        "entertainment": 0.43140638481449517,
+        "movie": 21.397756686798964,
+        "news": 56.34167385677308,
+        "series": 0.43140638481449517
+      },
+      "('weekend', 'couple', 'night', 'young', 'female')": {
+        "documentary": 0.23169601482854493,
+        "entertainment": 22.752548656163114,
+        "movie": 46.524559777571824,
+        "news": 0.23169601482854493,
+        "series": 30.259499536607976
+      },
+      "('weekend', 'couple', 'night', 'young', 'male')": {
+        "documentary": 0.21551724137931033,
+        "entertainment": 17.67241379310345,
+        "movie": 39.78448275862069,
+        "news": 0.21551724137931033,
+        "series": 42.11206896551724
+      },
+      "('weekend', 'family', 'afternoon', 'adult', 'female')": {
+        "documentary": 0.250501002004008,
+        "entertainment": 62.474949899799604,
+        "movie": 0.250501002004008,
+        "news": 11.072144288577155,
+        "series": 25.951903807615235
+      },
+      "('weekend', 'family', 'afternoon', 'adult', 'male')": {
+        "documentary": 0.25746652935118425,
+        "entertainment": 43.35736354273944,
+        "movie": 0.25746652935118425,
+        "news": 18.331616889804323,
+        "series": 37.79608650875386
+      },
+      "('weekend', 'family', 'afternoon', 'senior', 'female')": {
+        "documentary": 20.572640509013787,
+        "entertainment": 0.5302226935312832,
+        "movie": 23.435843054082717,
+        "news": 54.93107104984094,
+        "series": 0.5302226935312832
+      },
+      "('weekend', 'family', 'afternoon', 'senior', 'male')": {
+        "documentary": 32.96943231441048,
+        "entertainment": 0.5458515283842794,
+        "movie": 27.074235807860266,
+        "news": 38.864628820960704,
+        "series": 0.5458515283842794
+      },
+      "('weekend', 'family', 'afternoon', 'young', 'female')": {
+        "documentary": 0.25746652935118425,
+        "entertainment": 43.35736354273944,
+        "movie": 0.25746652935118425,
+        "news": 23.892893923789906,
+        "series": 32.23480947476828
+      },
+      "('weekend', 'family', 'afternoon', 'young', 'male')": {
+        "documentary": 0.25746652935118436,
+        "entertainment": 64.21215242018538,
+        "movie": 0.25746652935118436,
+        "news": 12.770339855818744,
+        "series": 22.502574665293515
+      },
+      "('weekend', 'family', 'morning', 'adult', 'female')": {
+        "documentary": 0.37091988130563786,
+        "entertainment": 46.43916913946587,
+        "movie": 0.37091988130563786,
+        "news": 20.400593471810083,
+        "series": 32.41839762611276
+      },
+      "('weekend', 'family', 'morning', 'adult', 'male')": {
+        "documentary": 0.4638218923933209,
+        "entertainment": 48.05194805194805,
+        "movie": 0.4638218923933209,
+        "news": 12.987012987012985,
+        "series": 38.03339517625231
+      },
+      "('weekend', 'family', 'morning', 'senior', 'female')": {
+        "documentary": 24.814264487369982,
+        "entertainment": 0.7429420505200593,
+        "movie": 8.7667161961367,
+        "news": 64.93313521545319,
+        "series": 0.7429420505200593
+      },
+      "('weekend', 'family', 'morning', 'senior', 'male')": {
+        "documentary": 32.68101761252446,
+        "entertainment": 0.9784735812133072,
+        "movie": 11.545988258317024,
+        "news": 53.81604696673189,
+        "series": 0.9784735812133072
+      },
+      "('weekend', 'family', 'morning', 'young', 'female')": {
+        "documentary": 0.3434065934065933,
+        "entertainment": 52.26648351648351,
+        "movie": 0.3434065934065933,
+        "news": 11.469780219780217,
+        "series": 35.57692307692307
+      },
+      "('weekend', 'family', 'morning', 'young', 'male')": {
+        "documentary": 0.33112582781456945,
+        "entertainment": 55.7615894039735,
+        "movie": 0.33112582781456945,
+        "news": 11.059602649006619,
+        "series": 32.51655629139073
+      },
+      "('weekend', 'family', 'night', 'adult', 'female')": {
+        "documentary": 0.4524886877828054,
+        "entertainment": 15.113122171945701,
+        "movie": 46.87782805429864,
+        "news": 0.4524886877828054,
+        "series": 37.10407239819004
+      },
+      "('weekend', 'family', 'night', 'adult', 'male')": {
+        "documentary": 0.44169611307420487,
+        "entertainment": 17.13780918727915,
+        "movie": 31.44876325088339,
+        "news": 0.44169611307420487,
+        "series": 50.530035335689035
+      },
+      "('weekend', 'family', 'night', 'senior', 'female')": {
+        "documentary": 30.03095975232198,
+        "entertainment": 0.7739938080495355,
+        "movie": 17.492260061919502,
+        "news": 50.92879256965944,
+        "series": 0.7739938080495355
+      },
+      "('weekend', 'family', 'night', 'senior', 'male')": {
+        "documentary": 24.00990099009901,
+        "entertainment": 0.6188118811881188,
+        "movie": 27.351485148514847,
+        "news": 47.400990099009896,
+        "series": 0.6188118811881188
+      },
+      "('weekend', 'family', 'night', 'young', 'female')": {
+        "documentary": 0.35663338088445073,
+        "entertainment": 13.837375178316687,
+        "movie": 38.87303851640513,
+        "news": 0.35663338088445073,
+        "series": 46.57631954350927
+      },
+      "('weekend', 'family', 'night', 'young', 'male')": {
+        "documentary": 0.303951367781155,
+        "entertainment": 24.924012158054712,
+        "movie": 36.413373860182375,
+        "news": 0.303951367781155,
+        "series": 38.05471124620061
+      },
+      "('weekend', 'single', 'afternoon', 'adult', 'female')": {
+        "documentary": 0.2896871378910776,
+        "entertainment": 53.47624565469293,
+        "movie": 0.2896871378910776,
+        "news": 9.675550405561992,
+        "series": 36.268829663962926
+      },
+      "('weekend', 'single', 'afternoon', 'adult', 'male')": {
+        "documentary": 0.30902348578491967,
+        "entertainment": 55.3770086526576,
+        "movie": 0.30902348578491967,
+        "news": 15.327564894932017,
+        "series": 28.67737948084055
+      },
+      "('weekend', 'single', 'afternoon', 'senior', 'female')": {
+        "documentary": 14.986737400530503,
+        "entertainment": 0.663129973474801,
+        "movie": 43.633952254641905,
+        "news": 40.05305039787798,
+        "series": 0.663129973474801
+      },
+      "('weekend', 'single', 'afternoon', 'senior', 'male')": {
+        "documentary": 16.75025075225677,
+        "entertainment": 0.5015045135406218,
+        "movie": 32.99899699097291,
+        "news": 49.247743229689064,
+        "series": 0.5015045135406218
+      },
+      "('weekend', 'single', 'afternoon', 'young', 'female')": {
+        "documentary": 0.2376425855513308,
+        "entertainment": 47.71863117870722,
+        "movie": 0.2376425855513308,
+        "news": 7.937262357414449,
+        "series": 43.868821292775664
+      },
+      "('weekend', 'single', 'afternoon', 'young', 'male')": {
+        "documentary": 0.250501002004008,
+        "entertainment": 51.653306613226455,
+        "movie": 0.250501002004008,
+        "news": 9.719438877755511,
+        "series": 38.12625250501002
+      },
+      "('weekend', 'single', 'morning', 'adult', 'female')": {
+        "documentary": 0.37850113550340636,
+        "entertainment": 53.52006056018167,
+        "movie": 0.37850113550340636,
+        "news": 10.598031794095379,
+        "series": 35.12490537471612
+      },
+      "('weekend', 'single', 'morning', 'adult', 'male')": {
+        "documentary": 0.3498950314905528,
+        "entertainment": 57.03289013296011,
+        "movie": 0.3498950314905528,
+        "news": 21.13365990202939,
+        "series": 21.13365990202939
+      },
+      "('weekend', 'single', 'morning', 'senior', 'female')": {
+        "documentary": 16.79049034175334,
+        "entertainment": 0.7429420505200593,
+        "movie": 32.838038632986624,
+        "news": 48.88558692421991,
+        "series": 0.7429420505200593
+      },
+      "('weekend', 'single', 'morning', 'senior', 'male')": {
+        "documentary": 20.0,
+        "entertainment": 0.7142857142857142,
+        "movie": 16.142857142857142,
+        "news": 62.42857142857143,
+        "series": 0.7142857142857142
+      },
+      "('weekend', 'single', 'morning', 'young', 'female')": {
+        "documentary": 0.3709198813056379,
+        "entertainment": 48.44213649851632,
+        "movie": 0.3709198813056379,
+        "news": 20.400593471810087,
+        "series": 30.41543026706231
+      },
+      "('weekend', 'single', 'morning', 'young', 'male')": {
+        "documentary": 0.28522532800912714,
+        "entertainment": 41.87107815173987,
+        "movie": 0.28522532800912714,
+        "news": 23.38847689674843,
+        "series": 34.16999429549344
+      },
+      "('weekend', 'single', 'night', 'adult', 'female')": {
+        "documentary": 0.25393600812595224,
+        "entertainment": 13.966480446927374,
+        "movie": 42.762823768410364,
+        "news": 0.25393600812595224,
+        "series": 42.762823768410364
+      },
+      "('weekend', 'single', 'night', 'adult', 'male')": {
+        "documentary": 0.3498950314905528,
+        "entertainment": 21.13365990202939,
+        "movie": 38.13855843247026,
+        "news": 0.3498950314905528,
+        "series": 40.02799160251924
+      },
+      "('weekend', 'single', 'night', 'senior', 'female')": {
+        "documentary": 12.778603268945021,
+        "entertainment": 0.7429420505200593,
+        "movie": 32.838038632986624,
+        "news": 52.897473997028236,
+        "series": 0.7429420505200593
+      },
+      "('weekend', 'single', 'night', 'senior', 'male')": {
+        "documentary": 35.034802784222734,
+        "entertainment": 0.580046403712297,
+        "movie": 31.90255220417633,
+        "news": 31.90255220417633,
+        "series": 0.580046403712297
+      },
+      "('weekend', 'single', 'night', 'young', 'female')": {
+        "documentary": 0.33715441672285906,
+        "entertainment": 24.005394470667564,
+        "movie": 44.0323668240054,
+        "news": 0.33715441672285906,
+        "series": 31.287929871881325
+      },
+      "('weekend', 'single', 'night', 'young', 'male')": {
+        "documentary": 0.32530904359141183,
+        "entertainment": 17.89199739752765,
+        "movie": 51.26870527000651,
+        "news": 0.32530904359141183,
+        "series": 30.188679245283023
+      }
+    }
+  },
+  "ProgramGenre": {
+    "parents": [
+      "DayType",
+      "ProgramType",
+      "UserGender"
+    ],
+    "state_names": {
+      "ProgramGenre": [
+        "comedy",
+        "documentary",
+        "drama",
+        "entertainment",
+        "horror",
+        "news",
+        "romance"
+      ],
+      "DayType": [
+        "weekday",
+        "weekend"
+      ],
+      "ProgramType": [
+        "documentary",
+        "entertainment",
+        "movie",
+        "news",
+        "series"
+      ],
+      "UserGender": [
+        "female",
+        "male"
+      ]
+    },
+    "counts": {
+      "('weekday', 'documentary', 'female')": {
+        "comedy": 0.35714285714285704,
+        "documentary": 97.85714285714283,
+        "drama": 0.35714285714285704,
+        "entertainment": 0.35714285714285704,
+        "horror": 0.35714285714285704,
+        "news": 0.35714285714285704,
+        "romance": 0.35714285714285704
+      },
+      "('weekday', 'documentary', 'male')": {
+        "comedy": 0.435540069686411,
+        "documentary": 97.3867595818815,
+        "drama": 0.435540069686411,
+        "entertainment": 0.435540069686411,
+        "horror": 0.435540069686411,
+        "news": 0.435540069686411,
+        "romance": 0.435540069686411
+      },
+      "('weekday', 'entertainment', 'female')": {
+        "comedy": 0.07128599942971203,
+        "documentary": 0.07128599942971203,
+        "drama": 0.07128599942971203,
+        "entertainment": 99.57228400342174,
+        "horror": 0.07128599942971203,
+        "news": 0.07128599942971203,
+        "romance": 0.07128599942971203
+      },
+      "('weekday', 'entertainment', 'male')": {
+        "comedy": 0.07157171485828802,
+        "documentary": 0.07157171485828802,
+        "drama": 0.07157171485828802,
+        "entertainment": 99.5705697108503,
+        "horror": 0.07157171485828802,
+        "news": 0.07157171485828802,
+        "romance": 0.07157171485828802
+      },
+      "('weekday', 'movie', 'female')": {
+        "comedy": 27.601641178664675,
+        "documentary": 0.18649757553151808,
+        "drama": 42.484147706079824,
+        "entertainment": 0.18649757553151808,
+        "horror": 4.102946661693398,
+        "news": 0.18649757553151808,
+        "romance": 25.251771726967547
+      },
+      "('weekday', 'movie', 'male')": {
+        "comedy": 38.7725552013909,
+        "documentary": 14.837463923500437,
+        "drama": 147.89205215879457,
+        "entertainment": 14.837463923500437,
+        "horror": 36.946997392060275,
+        "news": 14.837463923500437,
+        "romance": 31.87600347725297
+      },
+      "('weekday', 'news', 'female')": {
+        "comedy": 0.08061915511125445,
+        "documentary": 0.08061915511125445,
+        "drama": 0.08061915511125445,
+        "entertainment": 0.08061915511125445,
+        "horror": 0.08061915511125445,
+        "news": 99.51628506933248,
+        "romance": 0.08061915511125445
+      },
+      "('weekday', 'news', 'male')": {
+        "comedy": 0.07215007215007216,
+        "documentary": 0.07215007215007216,
+        "drama": 0.07215007215007216,
+        "entertainment": 0.07215007215007216,
+        "horror": 0.07215007215007216,
+        "news": 99.56709956709958,
+        "romance": 0.07215007215007216
+      },
+      "('weekday', 'series', 'female')": {
+        "comedy": 47.34801100825619,
+        "documentary": 0.06254691018263699,
+        "drama": 41.9189392044033,
+        "entertainment": 0.06254691018263699,
+        "horror": 10.482862146609957,
+        "news": 0.06254691018263699,
+        "romance": 0.06254691018263699
+      },
+      "('weekday', 'series', 'male')": {
+        "comedy": 42.51082251082252,
+        "documentary": 0.0865800865800866,
+        "drama": 37.29870129870131,
+        "entertainment": 0.0865800865800866,
+        "horror": 19.84415584415585,
+        "news": 0.0865800865800866,
+        "romance": 0.0865800865800866
+      },
+      "('weekend', 'documentary', 'female')": {
+        "comedy": 1.1904761904761905,
+        "documentary": 92.85714285714285,
+        "drama": 1.1904761904761905,
+        "entertainment": 1.1904761904761905,
+        "horror": 1.1904761904761905,
+        "news": 1.1904761904761905,
+        "romance": 1.1904761904761905
+      },
+      "('weekend', 'documentary', 'male')": {
+        "comedy": 0.8928571428571433,
+        "documentary": 94.64285714285718,
+        "drama": 0.8928571428571433,
+        "entertainment": 0.8928571428571433,
+        "horror": 0.8928571428571433,
+        "news": 0.8928571428571433,
+        "romance": 0.8928571428571433
+      },
+      "('weekend', 'entertainment', 'female')": {
+        "comedy": 34.10233658680863,
+        "documentary": 0.1478852410529429,
+        "drama": 0.1478852410529429,
+        "entertainment": 65.15823720792665,
+        "horror": 0.1478852410529429,
+        "news": 0.1478852410529429,
+        "romance": 0.1478852410529429
+      },
+      "('weekend', 'entertainment', 'male')": {
+        "comedy": 30.342857142857145,
+        "documentary": 0.14285714285714285,
+        "drama": 0.14285714285714285,
+        "entertainment": 68.94285714285714,
+        "horror": 0.14285714285714285,
+        "news": 0.14285714285714285,
+        "romance": 0.14285714285714285
+      },
+      "('weekend', 'movie', 'female')": {
+        "comedy": 23.829531812725087,
+        "documentary": 0.30012004801920766,
+        "drama": 46.938775510204074,
+        "entertainment": 0.30012004801920766,
+        "horror": 3.241296518607443,
+        "news": 0.30012004801920766,
+        "romance": 25.090036014405758
+      },
+      "('weekend', 'movie', 'male')": {
+        "comedy": 30.59617547806524,
+        "documentary": 0.281214848143982,
+        "drama": 32.56467941507311,
+        "entertainment": 0.281214848143982,
+        "horror": 21.934758155230597,
+        "news": 0.281214848143982,
+        "romance": 14.0607424071991
+      },
+      "('weekend', 'news', 'female')": {
+        "comedy": 0.25786487880350695,
+        "documentary": 0.25786487880350695,
+        "drama": 0.25786487880350695,
+        "entertainment": 0.25786487880350695,
+        "horror": 0.25786487880350695,
+        "news": 98.45281072717896,
+        "romance": 0.25786487880350695
+      },
+      "('weekend', 'news', 'male')": {
+        "comedy": 0.2695417789757413,
+        "documentary": 0.2695417789757413,
+        "drama": 0.2695417789757413,
+        "entertainment": 0.2695417789757413,
+        "horror": 0.2695417789757413,
+        "news": 98.38274932614556,
+        "romance": 0.2695417789757413
+      },
+      "('weekend', 'series', 'female')": {
+        "comedy": 48.016768784263135,
+        "documentary": 0.16123831022250884,
+        "drama": 42.14769429216381,
+        "entertainment": 0.16123831022250884,
+        "horror": 9.190583682683004,
+        "news": 0.16123831022250884,
+        "romance": 0.16123831022250884
+      },
+      "('weekend', 'series', 'male')": {
+        "comedy": 43.33675916409729,
+        "documentary": 0.171291538198013,
+        "drama": 37.58136348064405,
+        "entertainment": 0.171291538198013,
+        "horror": 18.396711202466594,
+        "news": 0.171291538198013,
+        "romance": 0.171291538198013
+      }
+    }
+  },
+  "ProgramDuration": {
+    "parents": [
+      "ProgramGenre",
+      "ProgramType"
+    ],
+    "state_names": {
+      "ProgramDuration": [
+        "long",
+        "medium",
+        "short"
+      ],
+      "ProgramGenre": [
+        "comedy",
+        "documentary",
+        "drama",
+        "entertainment",
+        "horror",
+        "news",
+        "romance"
+      ],
+      "ProgramType": [
+        "documentary",
+        "entertainment",
+        "movie",
+        "news",
+        "series"
+      ]
+    },
+    "counts": {
+      "('comedy', 'documentary')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('comedy', 'entertainment')": {
+        "long": 0.29962546816479396,
+        "medium": 41.19850187265918,
+        "short": 58.50187265917602
+      },
+      "('comedy', 'movie')": {
+        "long": 99.4692144373673,
+        "medium": 0.26539278131634814,
+        "short": 0.26539278131634814
+      },
+      "('comedy', 'news')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('comedy', 'series')": {
+        "long": 0.07412348973389667,
+        "medium": 99.85175302053221,
+        "short": 0.07412348973389667
+      },
+      "('documentary', 'documentary')": {
+        "long": 0.1956181533646322,
+        "medium": 39.42683881064163,
+        "short": 60.37754303599374
+      },
+      "('documentary', 'entertainment')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('documentary', 'movie')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('documentary', 'news')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('documentary', 'series')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('drama', 'documentary')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('drama', 'entertainment')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('drama', 'movie')": {
+        "long": 99.64387464387464,
+        "medium": 0.17806267806267803,
+        "short": 0.17806267806267803
+      },
+      "('drama', 'news')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('drama', 'series')": {
+        "long": 0.08429215661482699,
+        "medium": 99.83141568677034,
+        "short": 0.08429215661482699
+      },
+      "('entertainment', 'documentary')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('entertainment', 'entertainment')": {
+        "long": 0.03592728317884601,
+        "medium": 40.17388805058561,
+        "short": 59.79018466623553
+      },
+      "('entertainment', 'movie')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('entertainment', 'news')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('entertainment', 'series')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('horror', 'documentary')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('horror', 'entertainment')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('horror', 'movie')": {
+        "long": 98.99142713061018,
+        "medium": 0.5042864346949066,
+        "short": 0.5042864346949066
+      },
+      "('horror', 'news')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('horror', 'series')": {
+        "long": 0.23758612497030168,
+        "medium": 99.52482775005939,
+        "short": 0.23758612497030168
+      },
+      "('news', 'documentary')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('news', 'entertainment')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('news', 'movie')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('news', 'news')": {
+        "long": 0.039668372406680155,
+        "medium": 0.039668372406680155,
+        "short": 99.92066325518664
+      },
+      "('news', 'series')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('romance', 'documentary')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('romance', 'entertainment')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('romance', 'movie')": {
+        "long": 99.31200550395596,
+        "medium": 0.34399724802201576,
+        "short": 0.34399724802201576
+      },
+      "('romance', 'news')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      },
+      "('romance', 'series')": {
+        "long": 33.333333333333336,
+        "medium": 33.333333333333336,
+        "short": 33.333333333333336
+      }
+    }
+  },
+  "UserGender": {
+    "parents": [],
+    "state_names": {
+      "UserGender": [
+        "female",
+        "male"
+      ]
+    },
+    "counts": {
+      "()": {
+        "female": 50.633663366336634,
+        "male": 49.366336633663366
+      }
+    }
+  },
+  "HouseholdType": {
+    "parents": [],
+    "state_names": {
+      "HouseholdType": [
+        "couple",
+        "family",
+        "single"
+      ]
+    },
+    "counts": {
+      "()": {
+        "couple": 40.67656765676567,
+        "family": 29.57755775577558,
+        "single": 29.745874587458747
+      }
+    }
+  },
+  "TimeOfDay": {
+    "parents": [],
+    "state_names": {
+      "TimeOfDay": [
+        "afternoon",
+        "morning",
+        "night"
+      ]
+    },
+    "counts": {
+      "()": {
+        "afternoon": 39.973597359735976,
+        "morning": 30.33993399339934,
+        "night": 29.68646864686469
+      }
+    }
+  },
+  "DayType": {
+    "parents": [],
+    "state_names": {
+      "DayType": [
+        "weekday",
+        "weekend"
+      ]
+    },
+    "counts": {
+      "()": {
+        "weekday": 70.12871287128712,
+        "weekend": 29.87128712871287
+      }
+    }
+  }
+}

@@ -436,4 +436,3 @@ venv/
 !requirements.txt
 
 states.json
-cpt_counts.json
