@@ -28,13 +28,13 @@ def main():
 
     print("TV Assistant. Type 'exit' to quit.\n")
 
-    model = load_model("main/outputs/model.pkl")
+    model = load_model("main/output/model.pkl")
 
     # Initialize CPT counts
     cpt_counts = initialize_cpt_counts(model, virtual_sample_size=100)
 
     # Load previous counts if they exist
-    counts_path = Path(__file__).parent / "outputs/cpt_counts.json"
+    counts_path = Path(__file__).parent / "output/cpt_counts.json"
     if counts_path.exists():
         try:
             cpt_counts = load_cpt_counts(counts_path)
