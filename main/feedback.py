@@ -1,4 +1,4 @@
-# feedback.py (VERSIÓN ACTUALIZADA)
+# feedback.py
 
 from collections import defaultdict
 import itertools
@@ -81,7 +81,7 @@ def build_cpd_from_counts(variable, cpt_info):
 
 
 # ============================================================================
-# Apply feedback - NUEVA VERSIÓN para ProgramType y ProgramGenre
+# Apply feedback (ProgramType, ProgramGenre)
 # ============================================================================
 
 def apply_feedback(model, cpt_counts, state, learning_rate=50):
