@@ -88,71 +88,7 @@ Tu tarea es:
 NUNCA respondas fuera del JSON.
 """
 
-# Intent classifier prompt
 
-INTENT_PROMPT = """
-Eres un clasificador de intención. Devuelve SOLO un JSON válido:
-
-{
- "intent": "RECOMMEND" | "ALTERNATIVE" | "FEEDBACK_POS" | "FEEDBACK_NEG" | "SMALLTALK" | "OTHER"
-}
-
-Reglas:
-- RECOMMEND: El usuario pide recomendación, sugerencia, qué ver, etc.
-- ALTERNATIVE: El usuario pide otra opción o rechaza la recomendación previa ("otra", "no esa", etc).
-- FEEDBACK_POS: Acepta la recomendación ("me gusta", "perfecto", "vale").
-- FEEDBACK_NEG: La rechaza explícitamente ("no quiero", "eso no").
-- SMALLTALK: Conversación trivial ("hola", "gracias", etc.)
-- OTHER: Todo lo que no encaje.
-
-No añadas texto fuera del JSON.
-"""
-
-# Attribute extraction prompt
-
-EXTRACTION_PROMPT = """
-Eres un modelo extractor. Devuelve SOLO un JSON válido con estos campos,
-alineados exactamente con los nodos de una Red Bayesiana:
-
-{
- "UserAge": ...,
- "UserGender": ...,
- "HouseholdType": ...,
- "TimeOfDay": ...,
- "DayType": ...,
- "ProgramType": ...,
- "ProgramGenre": ...,
- "ProgramDuration": ...
-}
-
-Reglas:
-- Si no se menciona un atributo, usa null.
-- No añadas texto fuera del JSON.
-- No uses markdown.
-- Usa EXACTAMENTE los nombres de los campos indicados.
-
-Convenciones:
-- UserAge: "young" (18-35), "adult" (36-55), "senior" (56+)
-- UserGender: "male" | "female"
-- HouseholdType: "single" | "couple" | "family"
-
-- TimeOfDay:
-  - "morning" (07:00-12:00)
-  - "afternoon" (12:00-20:00)
-  - "night" (20:00-07:00)
-
-- DayType: "weekday" | "weekend"
-
-- ProgramType: "movie" | "series" | "news" | "documentary" | "entertainment"
-- ProgramGenre: "comedy" | "drama" | "horror" | "romance" | "news" | "documentary" | "entertainment"
-- ProgramDuration:
-  - "short" (<30 min)
-  - "medium" (30-60 min)
-  - "long" (>60 min)
-
-Si el usuario menciona un tipo de programa pero no la duración, infiere la duración típica.
-Si no hay información suficiente, usa null.
-"""
 
 # Intent classifier prompt
 
@@ -173,7 +109,6 @@ Definiciones:
 
 No añadas texto fuera del JSON.
 """
-
 
 # Attribute extraction prompt
 
