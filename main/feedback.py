@@ -157,7 +157,7 @@ def update_program_type_cpd(model, cpt_counts, program_type, attrs, feedback, le
     elif feedback == "rejected":
         # Penalize the recommended type (but don't go below a minimum)
         current = cpt["counts"][parent_state][program_type]
-        penalty = min(learning_rate * 0.5, current * 0.2)  # Max 20% reduction
+        penalty = min(learning_rate * 0.5, current * 0.2)
         cpt["counts"][parent_state][program_type] = max(1, current - penalty)
         
         # Slightly boost alternatives
