@@ -84,59 +84,75 @@ IMPORTANTE:
 - Siempre ofrece alternativas (otros géneros, tipos)
 - Mantén un lenguaje cercano y amigable, adaptado a personas mayores
 - No uses tecnicismos innecesarios
+- RESPONDE SOLO EN FORMATO JSON, SIN TEXTO ADICIONAL
 
-Tu tarea es:
-1. Interpretar la intención del usuario
-2. Decidir si debes:
-   - recomendar algo específico (de real_content)
-   - recomendar por género (si no hay real_content)
-   - explicar la recomendación
-   - ofrecer una alternativa
-   - pedir más información
-   - reconocer feedback positivo/negativo
-3. Generar un mensaje conversacional claro y amable
-4. Responder SIEMPRE con un JSON con los campos:
+FORMATO DE RESPUESTA OBLIGATORIO:
+Responde SIEMPRE con este JSON exacto, sin markdown, sin explicaciones:
 {
- "action": "RECOMMEND" | "ASK" | "ALTERNATIVE" | "SMALLTALK" | "FEEDBACK",
- "message": "mensaje conversacional para el usuario",
- "item": "título exacto del contenido recomendado o null",
- "content_id": "ID del contenido de TMDB o null"
+ "action": "RECOMMEND",
+ "message": "Tu mensaje conversacional aquí",
+ "item": "Título del contenido o null",
+ "content_id": 123
 }
 
-NUNCA respondas fuera del JSON.
+NUNCA AÑADAS:
+- Bloques de código ```json
+- Texto antes o después del JSON
+- Explicaciones adicionales
+- Markdown
 """
 
 INTENT_PROMPT = """
-Eres un clasificador de intención. Devuelve SOLO un JSON válido:
+Eres un clasificador de intención. Devuelve SOLO un JSON válido, sin markdown ni bloques de código.
 
+REGLAS CRÍTICAS PARA CLASIFICACIÓN:
+
+1. ALTERNATIVE - Usuario rechaza y pide otra opción:
+   - "Otra opción" / "Dame otra"
+   - "No me gusta [género]" → ALTERNATIVE (no FEEDBACK_NEG)
+   - "Nada de [género]"
+   - "Prefiero otra cosa"
+   - "Algo diferente"
+   
+2. FEEDBACK_POS - Acepta explícitamente LA RECOMENDACIÓN ACTUAL:
+   - "Me gusta" (refiriéndose a la película recomendada)
+   - "Perfecto" / "Vale" / "De acuerdo"
+   - "La veo" / "Esa sí"
+   
+3. FEEDBACK_NEG - Rechaza LA PELÍCULA/SERIE específica (NO el género):
+   - "Esa no me gusta" (la película específica)
+   - "Ya la vi"
+   - "No me convence esa"
+   IMPORTANTE: Si menciona el género, es ALTERNATIVE, no FEEDBACK_NEG
+
+4. RECOMMEND - Pide nueva recomendación:
+   - "Qué puedo ver"
+   - "Recomiéndame algo"
+   - "Quiero ver [tipo/género]"
+
+5. SMALLTALK - Conversación trivial:
+   - "Hola" / "Gracias" / "Adiós"
+
+6. OTHER - Todo lo demás
+
+EJEMPLOS CRÍTICOS:
+"No me gusta el drama" → ALTERNATIVE (rechaza género, no película)
+"Esa no me gusta" → FEEDBACK_NEG (rechaza película específica)
+"Dame otra" → ALTERNATIVE
+"Perfecto" → FEEDBACK_POS
+"Quiero ver comedia" → RECOMMEND
+
+Responde SOLO con:
 {
- "intent": "RECOMMEND" | "ALTERNATIVE" | "FEEDBACK_POS" | "FEEDBACK_NEG" | "SMALLTALK" | "OTHER"
+ "intent": "RECOMMEND"
 }
 
-Reglas:
-- RECOMMEND: El usuario pide recomendación, sugerencia, qué ver, etc.
-  Ejemplos: "qué puedo ver", "recomiéndame algo", "quiero ver una película"
-  
-- ALTERNATIVE: El usuario pide otra opción o rechaza la recomendación previa.
-  Ejemplos: "otra cosa", "no esa", "dame más opciones", "algo diferente"
-  
-- FEEDBACK_POS: Acepta la recomendación explícitamente.
-  Ejemplos: "me gusta", "perfecto", "vale", "de acuerdo", "la veo"
-  
-- FEEDBACK_NEG: La rechaza explícitamente.
-  Ejemplos: "no quiero", "eso no", "no me interesa", "muy aburrido"
-  
-- SMALLTALK: Conversación trivial.
-  Ejemplos: "hola", "gracias", "adiós", "buenos días"
-  
-- OTHER: Todo lo que no encaje claramente en las categorías anteriores.
-
-No añadas texto fuera del JSON.
+Sin bloques de código, sin markdown, sin texto adicional.
 """
 
 EXTRACTION_PROMPT = """
 Eres un modelo extractor de atributos para una Red Bayesiana.
-Devuelve SOLO un JSON válido con los siguientes campos EXACTOS:
+Devuelve SOLO un JSON válido con los siguientes campos EXACTOS, sin markdown ni bloques de código:
 
 {
   "UserAge": ...,
@@ -153,69 +169,53 @@ Reglas estrictas:
 - Si un atributo no se menciona explícitamente, usa null.
 - No inventes valores.
 - No añadas texto fuera del JSON.
-- No uses markdown ni bloques de código.
+- No uses markdown ni bloques de código (```).
 - Usa EXACTAMENTE los nombres de los campos indicados (respeta mayúsculas).
 
 Convenciones de valores:
 
-UserAge:
-- "young" (18-35 años)
-- "adult" (36-55 años)
-- "senior" (56+ años)
+UserAge: "young" (18-35) | "adult" (36-55) | "senior" (56+)
+UserGender: "male" | "female"
+HouseholdType: "single" | "couple" | "family"
+TimeOfDay: "morning" (07:00-12:00) | "afternoon" (12:00-20:00) | "night" (20:00-07:00)
+DayType: "weekday" | "weekend"
+ProgramType: "movie" | "series" | "news" | "documentary" | "entertainment"
+ProgramGenre: "comedy" | "drama" | "horror" | "romance" | "news" | "documentary" | "entertainment" | "action" | "thriller" | "sci-fi" | "fantasy"
+ProgramDuration: "short" (<30 min) | "medium" (30-60 min) | "long" (>60 min)
 
-UserGender:
-- "male"
-- "female"
+EJEMPLOS:
+Input: "Quiero ver una comedia de 90 minutos"
+Output: {"UserAge": null, "UserGender": null, "HouseholdType": null, "TimeOfDay": null, "DayType": null, "ProgramType": "movie", "ProgramGenre": "comedy", "ProgramDuration": "long"}
 
-HouseholdType:
-- "single" (vive solo/a)
-- "couple" (pareja)
-- "family" (familia con hijos)
-
-TimeOfDay:
-- "morning" (07:00-12:00)
-- "afternoon" (12:00-20:00)
-- "night" (20:00-07:00)
-
-DayType:
-- "weekday" (lunes a viernes)
-- "weekend" (sábado y domingo)
-
-ProgramType:
-- "movie" (película)
-- "series" (serie de TV)
-- "news" (noticias/informativos)
-- "documentary" (documental)
-- "entertainment" (entretenimiento/concursos)
-
-ProgramGenre:
-- "comedy" (comedia)
-- "drama" (drama)
-- "horror" (terror/suspense)
-- "romance" (romántico)
-- "news" (informativo)
-- "documentary" (documental)
-- "entertainment" (entretenimiento)
-- "action" (acción)
-- "thriller" (thriller)
-- "sci-fi" (ciencia ficción)
-- "fantasy" (fantasía)
-
-ProgramDuration:
-- "short" (menos de 30 minutos)
-- "medium" (30-60 minutos)
-- "long" (más de 60 minutos)
-
-Notas importantes:
-- Si el usuario menciona un tipo de programa pero no la duración, deja ProgramDuration en null.
-- No deduzcas género ni duración salvo que se indiquen explícitamente.
-- TimeOfDay y DayType se rellenarán automáticamente, pero si el usuario los menciona explícitamente, úsalos.
+Input: "Soy un chico de 32 años"
+Output: {"UserAge": "young", "UserGender": "male", "HouseholdType": null, "TimeOfDay": null, "DayType": null, "ProgramType": null, "ProgramGenre": null, "ProgramDuration": null}
 """
 
 
 # ============================================================================
 # LLM FUNCTIONS
 # ============================================================================
+
+def clean_json_response(text: str) -> str:
+    """Clean JSON response from markdown and extra text"""
+    text = text.strip()
+    
+    # Remove markdown code blocks
+    if text.startswith("```"):
+        text = text.split("```")[1]
+        if text.startswith("json"):
+            text = text[4:]
+        text = text.strip()
+    
+    # Find JSON object
+    start = text.find("{")
+    end = text.rfind("}") + 1
+    
+    if start != -1 and end > start:
+        text = text[start:end]
+    
+    return text.strip()
+
 
 def classify_intent(user_message: str) -> str:
     """
@@ -232,8 +232,17 @@ def classify_intent(user_message: str) -> str:
         ],
         temperature=0
     )
-    data = json.loads(resp.choices[0].message.content)
-    return data["intent"]
+    
+    content = resp.choices[0].message.content
+    content = clean_json_response(content)
+    
+    try:
+        data = json.loads(content)
+        return data["intent"]
+    except json.JSONDecodeError as e:
+        print(f"Error parsing intent JSON: {e}")
+        print(f"Raw response: {content}")
+        return "OTHER"
 
 
 def extract_attributes_llm(user_message: str) -> dict:
@@ -251,7 +260,16 @@ def extract_attributes_llm(user_message: str) -> dict:
         ],
         temperature=0
     )
-    return json.loads(response.choices[0].message.content.strip())
+    
+    content = response.choices[0].message.content
+    content = clean_json_response(content)
+    
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError as e:
+        print(f"Error parsing extraction JSON: {e}")
+        print(f"Raw response: {content}")
+        return {}
 
 
 def converse(user_message: str, state: dict, history: list = None) -> str:
@@ -268,7 +286,7 @@ def converse(user_message: str, state: dict, history: list = None) -> str:
     """
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "system", "content": "STATE:\n" + json.dumps(state, indent=2, ensure_ascii=False)}
+        {"role": "system", "content": "STATE:\n" + json.dumps(state, indent=2, ensure_ascii=False, default=str)}
     ]
 
     if history:
@@ -279,7 +297,8 @@ def converse(user_message: str, state: dict, history: list = None) -> str:
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=messages,
-        temperature=0.5
+        temperature=0.3,  # Lower temperature for more consistent JSON
+        response_format={"type": "json_object"}  # Force JSON mode
     )
 
     return response.choices[0].message.content

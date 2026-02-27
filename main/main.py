@@ -13,7 +13,7 @@ from LLM_agent import (
     get_time_daytype,
     infer_with_bn,
 )
-from content_fetch import TMDBContentFetcher
+from content_fetcher import TMDBContentFetcher
 
 # Nuevos colores para content
 CONTENT_COLOR = "\033[96m"
@@ -36,10 +36,10 @@ def fetch_real_content(
     program_genre = bn_result.get("ProgramGenre")
     
     if not program_type or not program_genre:
-        print(colorize("⚠️  Missing Type or Genre for content fetch", WARNING_COLOR))
+        print(colorize("Missing Type or Genre for content fetch", WARNING_COLOR))
         return []
     
-    print(colorize(f"🎬 Fetching content: Type={program_type}, Genre={program_genre}", CONTENT_COLOR))
+    print(colorize(f"Fetching content: Type={program_type}, Genre={program_genre}", CONTENT_COLOR))
     
     try:
         content = content_fetcher.get_content_by_recommendation(
@@ -50,7 +50,7 @@ def fetch_real_content(
         )
         
         if content:
-            print(colorize(f"✅ Found {len(content)} items:", CONTENT_COLOR))
+            print(colorize(f"Found {len(content)} items:", CONTENT_COLOR))
             for i, item in enumerate(content[:3], 1):
                 rating = item.get('vote_average', 0)
                 print(colorize(f"   {i}. {item['title']} ({rating}/10)", CONTENT_COLOR))
@@ -58,7 +58,7 @@ def fetch_real_content(
         
         # No content found - try alternatives
         if fallback_to_alternatives:
-            print(colorize(f"⚠️  No content for {program_genre}, trying alternatives...", WARNING_COLOR))
+            print(colorize(f"No content for {program_genre}, trying alternatives...", WARNING_COLOR))
             
             # Try alternative genres from BN ranking
             genre_ranking = bn_result.get("genre_ranking", [])
@@ -73,7 +73,7 @@ def fetch_real_content(
                 )
                 
                 if alt_content:
-                    print(colorize(f"✅ Found content with alternative genre: {alt_genre}", CONTENT_COLOR))
+                    print(colorize(f"Found content with alternative genre: {alt_genre}", CONTENT_COLOR))
                     # Update the genre in bn_result
                     bn_result["ProgramGenre"] = alt_genre
                     return alt_content
@@ -87,14 +87,14 @@ def fetch_real_content(
             )
             
             if trending:
-                print(colorize(f"✅ Using {len(trending)} trending items as fallback", CONTENT_COLOR))
+                print(colorize(f"Using {len(trending)} trending items as fallback", CONTENT_COLOR))
                 return trending[:limit]
         
-        print(colorize("❌ No content available for this recommendation", WARNING_COLOR))
+        print(colorize("No content available for this recommendation", WARNING_COLOR))
         return []
     
     except Exception as e:
-        print(colorize(f"❌ Error fetching content: {e}", WARNING_COLOR))
+        print(colorize(f"Error fetching content: {e}", WARNING_COLOR))
         return []
 
 
@@ -112,11 +112,11 @@ def try_next_alternative(state: dict, content_fetcher: TMDBContentFetcher) -> bo
         next_content = real_content[state["content_index"]]
         if state.get("last_recommendation"):
             state["last_recommendation"]["content"] = next_content
-        print(colorize(f"📋 Moving to item {state['content_index'] + 1}/{len(real_content)}", CONTENT_COLOR))
+        print(colorize(f"Moving to item {state['content_index'] + 1}/{len(real_content)}", CONTENT_COLOR))
         return True
     
     # No more in current list - try next genre from BN
-    print(colorize("🔄 End of content list, trying next genre...", WARNING_COLOR))
+    print(colorize("End of content list, trying next genre...", WARNING_COLOR))
     
     bn_result = state.get("candidates", {})
     genre_ranking = bn_result.get("genre_ranking", [])
@@ -149,7 +149,7 @@ def try_next_alternative(state: dict, content_fetcher: TMDBContentFetcher) -> bo
         pass
     
     # Try different type as last resort
-    print(colorize("🔄 Trying different program type...", WARNING_COLOR))
+    print(colorize("Trying different program type...", WARNING_COLOR))
     type_ranking = bn_result.get("type_ranking", [])
     current_type = bn_result.get("ProgramType")
     
@@ -179,7 +179,7 @@ def try_next_alternative(state: dict, content_fetcher: TMDBContentFetcher) -> bo
     except (ValueError, IndexError):
         pass
     
-    print(colorize("❌ No more alternatives available", WARNING_COLOR))
+    print(colorize("No more alternatives available", WARNING_COLOR))
     return False
 
 
@@ -209,16 +209,16 @@ def main():
     if counts_path.exists():
         try:
             cpt_counts = load_cpt_counts(counts_path)
-            print("📂 Loaded previous learning data\n")
+            print("Loaded previous learning data\n")
         except Exception as e:
-            print(f"⚠️  Could not load previous counts: {e}\n")
+            print(f"Could not load previous counts: {e}\n")
 
     # Initialize TMDB content fetcher
     try:
         content_fetcher = TMDBContentFetcher()
-        print("✅ TMDB API connected\n")
+        print("TMDB API connected\n")
     except Exception as e:
-        print(colorize(f"⚠️  Could not connect to TMDB: {e}", WARNING_COLOR))
+        print(colorize(f"Could not connect to TMDB: {e}", WARNING_COLOR))
         print(colorize("   System will work in genre-only mode", WARNING_COLOR))
         print(colorize("   Set TMDB_API_KEY in .env to enable real content\n", WARNING_COLOR))
         content_fetcher = None
@@ -265,7 +265,7 @@ def main():
                         "ProgramType": bn_result["ProgramType"],
                         "ProgramGenre": bn_result["ProgramGenre"]
                     }
-                    print(colorize("ℹ️  No specific titles available, will recommend by genre", WARNING_COLOR))
+                    print(colorize("No specific titles available, will recommend by genre", WARNING_COLOR))
             else:
                 # No TMDB connection - genre-only mode
                 state["real_content"] = []
@@ -283,30 +283,57 @@ def main():
             # Apply feedback
             apply_feedback(model, cpt_counts, state, learning_rate=50)
             
-            # Try to get next alternative
-            if content_fetcher and state.get("content_available"):
-                has_alternative = try_next_alternative(state, content_fetcher)
-                state["content_available"] = has_alternative
+            # Check if user is rejecting the entire genre
+            from smart_alternative import should_skip_to_next_genre, get_next_different_genre
+            
+            skip_genre, rejected_genre = should_skip_to_next_genre(mensaje, state)
+            
+            if skip_genre and rejected_genre:
+                print(colorize(f"User rejected entire genre: {rejected_genre}", WARNING_COLOR))
+                print(colorize("   Skipping to next different genre...", WARNING_COLOR))
                 
-                if not has_alternative:
-                    print(colorize("ℹ️  No more specific titles, switching to genre recommendations", WARNING_COLOR))
+                if content_fetcher:
+                    has_alternative = get_next_different_genre(state, content_fetcher, rejected_genre)
+                    state["content_available"] = has_alternative
+                else:
+                    # Genre-only mode
+                    bn_result = state.get("candidates", {})
+                    genre_ranking = bn_result.get("genre_ranking", [])
+                    
+                    # Find next genre that's not rejected
+                    for genre in genre_ranking:
+                        if genre != rejected_genre:
+                            bn_result["ProgramGenre"] = genre
+                            state["candidates"] = bn_result
+                            if state.get("last_recommendation"):
+                                state["last_recommendation"]["ProgramGenre"] = genre
+                            print(colorize(f"Switched to: {genre}", CONTENT_COLOR))
+                            break
             else:
-                # Genre-only mode - offer next genre from ranking
-                bn_result = state.get("candidates", {})
-                genre_ranking = bn_result.get("genre_ranking", [])
-                current_genre = bn_result.get("ProgramGenre")
-                
-                try:
-                    current_idx = genre_ranking.index(current_genre)
-                    if current_idx + 1 < len(genre_ranking):
-                        next_genre = genre_ranking[current_idx + 1]
-                        bn_result["ProgramGenre"] = next_genre
-                        state["candidates"] = bn_result
-                        if state.get("last_recommendation"):
-                            state["last_recommendation"]["ProgramGenre"] = next_genre
-                        print(colorize(f"📋 Next genre: {next_genre}", CONTENT_COLOR))
-                except (ValueError, IndexError):
-                    print(colorize("ℹ️  No more genre alternatives", WARNING_COLOR))
+                # Normal alternative flow (next item in list)
+                if content_fetcher and state.get("content_available"):
+                    has_alternative = try_next_alternative(state, content_fetcher)
+                    state["content_available"] = has_alternative
+                    
+                    if not has_alternative:
+                        print(colorize("No more specific titles, switching to genre recommendations", WARNING_COLOR))
+                else:
+                    # Genre-only mode - offer next genre from ranking
+                    bn_result = state.get("candidates", {})
+                    genre_ranking = bn_result.get("genre_ranking", [])
+                    current_genre = bn_result.get("ProgramGenre")
+                    
+                    try:
+                        current_idx = genre_ranking.index(current_genre)
+                        if current_idx + 1 < len(genre_ranking):
+                            next_genre = genre_ranking[current_idx + 1]
+                            bn_result["ProgramGenre"] = next_genre
+                            state["candidates"] = bn_result
+                            if state.get("last_recommendation"):
+                                state["last_recommendation"]["ProgramGenre"] = next_genre
+                            print(colorize(f"Next genre: {next_genre}", CONTENT_COLOR))
+                    except (ValueError, IndexError):
+                        print(colorize("No more genre alternatives", WARNING_COLOR))
 
         elif intent == "FEEDBACK_POS":
             state["user_feedback"] = "accepted"
@@ -315,8 +342,25 @@ def main():
 
         elif intent == "FEEDBACK_NEG":
             state["user_feedback"] = "rejected"
-            # Apply feedback
-            apply_feedback(model, cpt_counts, state, learning_rate=50)
+            
+            # Check if it's actually a genre rejection (reclassify)
+            from smart_alternative import should_skip_to_next_genre, get_next_different_genre
+            
+            skip_genre, rejected_genre = should_skip_to_next_genre(mensaje, state)
+            
+            if skip_genre and rejected_genre:
+                # It's actually a genre rejection, treat as ALTERNATIVE
+                print(colorize(f"Reclassified: Genre rejection detected", WARNING_COLOR))
+                print(colorize(f"User rejected entire genre: {rejected_genre}", WARNING_COLOR))
+                
+                apply_feedback(model, cpt_counts, state, learning_rate=50)
+                
+                if content_fetcher:
+                    has_alternative = get_next_different_genre(state, content_fetcher, rejected_genre)
+                    state["content_available"] = has_alternative
+            else:
+                # Regular negative feedback on specific content
+                apply_feedback(model, cpt_counts, state, learning_rate=50)
 
         elif intent in ("SMALLTALK", "OTHER"):
             pass
@@ -345,13 +389,13 @@ def main():
 
     # Save CPT counts
     save_cpt_counts(cpt_counts, counts_path)
-    print(f"\n💾 Learning data saved")
+    print(f"\nLearning data saved")
 
     save_path = Path(__file__).parent / "output/states.json"
     with open(save_path, "w", encoding="utf-8") as f:
         json.dump(states_log, f, indent=2, ensure_ascii=False)
 
-    print("📝 All states saved to states.json")
+    print("All states saved to states.json")
 
 
 if __name__ == "__main__":
