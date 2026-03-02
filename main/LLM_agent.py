@@ -320,7 +320,9 @@ def recommend_by_genre(state: dict) -> dict:
 
 def infer_with_bn(state: dict, model) -> dict:
     """
-    Run BN inference to get Type and Genre recommendations
+    Run BN inference to get Type and Genre recommendations.
+    If the user already specified ProgramType and/or ProgramGenre,
+    those values are used directly (no BN inference needed for them).
     
     Returns:
         Dictionary with ProgramType, ProgramGenre, and their rankings
@@ -330,29 +332,45 @@ def infer_with_bn(state: dict, model) -> dict:
         print(colorize("Not enough attributes for BN inference.", BN_LOG_COLOR))
         return {}
 
-    # Infer ProgramType
-    type_recs = recommend_type(attrs, model)
-    chosen_type = type_recs[0][0]
-    print(colorize(f"Type recommendations: {[t[0] for t in type_recs]}", BN_LOG_COLOR))
+    user_type  = attrs.get("ProgramType")
+    user_genre = attrs.get("ProgramGenre")
 
-    # Infer ProgramGenre conditioned on ProgramType
-    attrs_with_type = dict(attrs)
-    attrs_with_type["ProgramType"] = chosen_type
+    # ── ProgramType ──────────────────────────────────────────────────────────
+    if user_type:
+        # User already specified the type: use it directly, skip inference
+        chosen_type = user_type
+        type_ranking = [user_type]
+        print(colorize(f"ProgramType provided by user: {chosen_type}", BN_LOG_COLOR))
+    else:
+        type_recs = recommend_type(attrs, model)
+        chosen_type = type_recs[0][0]
+        type_ranking = [t[0] for t in type_recs]
+        print(colorize(f"Type recommendations (BN): {type_ranking}", BN_LOG_COLOR))
 
-    genre_recs = recommend_gender(attrs_with_type, model)
-    chosen_genre = genre_recs[0][0]
-    print(colorize(f"Genre recommendations: {[g[0] for g in genre_recs]}", BN_LOG_COLOR))
+    # ── ProgramGenre ─────────────────────────────────────────────────────────
+    if user_genre:
+        # User already specified the genre: use it directly, skip inference
+        chosen_genre = user_genre
+        genre_ranking = [user_genre]
+        print(colorize(f"ProgramGenre provided by user: {chosen_genre}", BN_LOG_COLOR))
+    else:
+        attrs_with_type = dict(attrs)
+        attrs_with_type["ProgramType"] = chosen_type
+        genre_recs = recommend_gender(attrs_with_type, model)
+        chosen_genre = genre_recs[0][0]
+        genre_ranking = [g[0] for g in genre_recs]
+        print(colorize(f"Genre recommendations (BN): {genre_ranking}", BN_LOG_COLOR))
 
     print(colorize(
-        f"BN inference: Type={chosen_type} | Genre={chosen_genre}",
+        f"Final decision: Type={chosen_type} | Genre={chosen_genre}",
         BN_LOG_COLOR
     ))
 
     return {
-        "ProgramType": chosen_type,
-        "ProgramGenre": chosen_genre,
-        "type_ranking": [t[0] for t in type_recs],
-        "genre_ranking": [g[0] for g in genre_recs],
+        "ProgramType":   chosen_type,
+        "ProgramGenre":  chosen_genre,
+        "type_ranking":  type_ranking,
+        "genre_ranking": genre_ranking,
     }
 
 
