@@ -71,6 +71,7 @@ Si content_available = true:
 - Presenta el contenido de forma natural: "Te recomiendo [TÍTULO], es [descripción breve]"
 - Menciona detalles relevantes: rating, año, si está en español, etc.
 - Si el usuario rechaza, ofrece el siguiente contenido de la lista
+- Si pide más datos de la película/serie, proporciónalos como SMALLTALK (sin inventar, solo lo que esté en real_content)
 
 Si content_available = false:
 - Recomienda por GÉNERO genérico ("Te recomiendo ver algo de comedia")
@@ -109,21 +110,19 @@ REGLAS CRÍTICAS PARA CLASIFICACIÓN:
 
 1. ALTERNATIVE - Usuario rechaza y pide otra opción:
    - "Otra opción" / "Dame otra"
-   - "No me gusta [género]" → ALTERNATIVE (no FEEDBACK_NEG)
    - "Nada de [género]"
    - "Prefiero otra cosa"
    - "Algo diferente"
    
 2. FEEDBACK_POS - Acepta explícitamente LA RECOMENDACIÓN ACTUAL:
-   - "Me gusta" (refiriéndose a la película recomendada)
+   - "Me gusta" (refiriéndose al género o tipo recomendado)
    - "Perfecto" / "Vale" / "De acuerdo"
    - "La veo" / "Esa sí"
    
 3. FEEDBACK_NEG - Rechaza LA PELÍCULA/SERIE específica (NO el género):
-   - "Esa no me gusta" (la película específica)
+   - "Esa no me gusta"
    - "Ya la vi"
    - "No me convence esa"
-   IMPORTANTE: Si menciona el género, es ALTERNATIVE, no FEEDBACK_NEG
 
 4. RECOMMEND - Pide nueva recomendación:
    - "Qué puedo ver"
@@ -132,13 +131,15 @@ REGLAS CRÍTICAS PARA CLASIFICACIÓN:
 
 5. SMALLTALK - Conversación trivial:
    - "Hola" / "Gracias" / "Adiós"
+   - Solicitud de información adicional sobre la película/serie (sin rechazar la recomendación actual)
 
 6. OTHER - Todo lo demás
 
 EJEMPLOS CRÍTICOS:
-"No me gusta el drama" → ALTERNATIVE (rechaza género, no película)
+"No me gusta el drama" → FEEDBACK_NEG (rechaza el género)
 "Esa no me gusta" → FEEDBACK_NEG (rechaza película específica)
 "Dame otra" → ALTERNATIVE
+"Esa no" → ALTERNATIVE (rechaza película específica, pide otra)
 "Perfecto" → FEEDBACK_POS
 "Quiero ver comedia" → RECOMMEND
 
