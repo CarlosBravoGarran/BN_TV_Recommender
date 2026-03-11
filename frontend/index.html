@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¿Qué vemos hoy? 📺</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fraunces:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">¿Qué vemos<span>?</span> 📺</div>
+  <div class="status-text">Asistente activo</div>
+  <div class="status-dot"></div>
+</header>
+
+<main>
+
+  <!-- CHAT -->
+  <div class="chat-column">
+
+    <div id="messages">
+      <div id="welcomeScreen">
+        <div class="welcome-icon">📺</div>
+        <h2>Hola, ¿qué quieres ver hoy?</h2>
+        <p>Cuéntame cómo te sientes, qué tipo de programa te apetece o simplemente pregúntame qué ponen. ¡Yo te ayudo a elegir!</p>
+        <div class="quick-replies" style="justify-content:center; margin-top:8px;">
+          <button class="qr-btn" onclick="sendQuick('Recomiéndame algo para esta noche')">🌙 Esta noche</button>
+          <button class="qr-btn" onclick="sendQuick('Quiero ver una película de comedia')">😂 Comedia</button>
+          <button class="qr-btn" onclick="sendQuick('Algo para ver en familia')">👨‍👩‍👧 En familia</button>
+          <button class="qr-btn" onclick="sendQuick('Recomiéndame una serie')">📱 Serie</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="typing-wrap" id="typingIndicator">
+      <div class="avatar bot-avatar">🤖</div>
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <div class="input-area">
+      <textarea
+        id="userInput"
+        placeholder="Escribe aquí lo que quieres ver…"
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+      <button id="sendBtn" onclick="sendMessage()">➤</button>
+    </div>
+
+  </div>
+
+  <!-- PANEL LATERAL -->
+  <aside class="side-panel">
+    <div class="panel-title">Sugerencias rápidas</div>
+    <div class="suggestion-grid">
+
+      <div class="suggestion-card" onclick="sendQuick('Quiero ver una película de acción')">
+        <div class="suggestion-icon">💥</div>
+        <div class="suggestion-text"><strong>Acción</strong><small>Películas de aventura</small></div>
+      </div>
+
+      <div class="suggestion-card" onclick="sendQuick('Quiero ver una comedia')">
+        <div class="suggestion-icon">😂</div>
+        <div class="suggestion-text"><strong>Comedia</strong><small>Para reír un rato</small></div>
+      </div>
+
+      <div class="suggestion-card" onclick="sendQuick('Quiero ver un documental')">
+        <div class="suggestion-icon">🌍</div>
+        <div class="suggestion-text"><strong>Documental</strong><small>Aprende algo nuevo</small></div>
+      </div>
+
+      <div class="suggestion-card" onclick="sendQuick('Quiero ver una serie de drama')">
+        <div class="suggestion-icon">🎭</div>
+        <div class="suggestion-text"><strong>Drama</strong><small>Series con historia</small></div>
+      </div>
+
+      <div class="suggestion-card" onclick="sendQuick('Algo romántico para ver con mi pareja')">
+        <div class="suggestion-icon">💕</div>
+        <div class="suggestion-text"><strong>Romance</strong><small>Para ver en pareja</small></div>
+      </div>
+
+      <div class="suggestion-card" onclick="sendQuick('Una película de terror')">
+        <div class="suggestion-icon">👻</div>
+        <div class="suggestion-text"><strong>Terror</strong><small>Si te atreves…</small></div>
+      </div>
+
+      <div class="suggestion-card" onclick="sendQuick('Quiero ver ciencia ficción')">
+        <div class="suggestion-icon">🚀</div>
+        <div class="suggestion-text"><strong>Ciencia Ficción</strong><small>El futuro te llama</small></div>
+      </div>
+
+      <div class="suggestion-card" onclick="sendQuick('Dame otra opción diferente')">
+        <div class="suggestion-icon">🔀</div>
+        <div class="suggestion-text"><strong>Otra opción</strong><small>Sorpréndeme</small></div>
+      </div>
+
+    </div>
+  </aside>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
