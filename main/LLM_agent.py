@@ -108,38 +108,41 @@ Eres un clasificador de intención. Devuelve SOLO un JSON válido, sin markdown 
 
 REGLAS CRÍTICAS PARA CLASIFICACIÓN:
 
-1. ALTERNATIVE - Usuario rechaza y pide otra opción:
-   - "Otra opción" / "Dame otra"
-   - "Nada de [género]"
-   - "Prefiero otra cosa"
-   - "Algo diferente"
-   
-2. FEEDBACK_POS - Acepta explícitamente LA RECOMENDACIÓN ACTUAL:
-   - "Me gusta" (refiriéndose al género o tipo recomendado)
+1. FEEDBACK_NEG - Usuario expresa que algo NO le gusta (recomendación, género o tipo):
+   - "No me gusta [algo]" / "No me gustan [algo]"
+   - "No me convence" / "No me llama la atención"
+   - "Ya la vi" / "La he visto"
+   - "Me aburre" / "No es para mí"
+
+2. FEEDBACK_POS - Usuario expresa que algo SÍ le gusta o lo acepta:
+   - "Me gusta" / "Me gusta ese tipo"
    - "Perfecto" / "Vale" / "De acuerdo"
-   - "La veo" / "Esa sí"
-   
-3. FEEDBACK_NEG - Rechaza LA PELÍCULA/SERIE específica (NO el género):
-   - "Esa no me gusta"
-   - "Ya la vi"
-   - "No me convence esa"
+   - "La veo" / "Sí, la veo" / "Esa sí"
+
+3. ALTERNATIVE - Usuario pide o prefiere algo DIFERENTE (sin expresar gusto/disgusto directo) y si se aplica feedback negativo, debe pasar luego una alternativa:
+   - "Nada de [género]" / "Sin [género]" / "No quiero ver [género]"
+   - "Dame otra opción" / "Otra cosa" / "Algo diferente"
+   - "Prefiero otra cosa" / "Prefiero algo diferente"
+   - "¿Hay algo más?" / "¿No tienes otra cosa?"
 
 4. RECOMMEND - Pide nueva recomendación:
-   - "Qué puedo ver"
-   - "Recomiéndame algo"
+   - "Qué puedo ver" / "Recomiéndame algo"
    - "Quiero ver [tipo/género]"
 
 5. SMALLTALK - Conversación trivial:
    - "Hola" / "Gracias" / "Adiós"
-   - Solicitud de información adicional sobre la película/serie (sin rechazar la recomendación actual)
 
 6. OTHER - Todo lo demás
 
 EJEMPLOS CRÍTICOS:
-"No me gusta el drama" → FEEDBACK_NEG (rechaza el género)
-"Esa no me gusta" → FEEDBACK_NEG (rechaza película específica)
+"No me gusta el drama" → FEEDBACK_NEG (expresa disgusto por el género)
+"No me gustan las comedias" → FEEDBACK_NEG (expresa disgusto por el género)
+"Esa no me gusta" → FEEDBACK_NEG (expresa disgusto por la recomendación)
+"Nada de terror" → ALTERNATIVE (pide algo diferente, sin usar "no me gusta")
+"No quiero ver comedias" → ALTERNATIVE (pide evitar ese género)
 "Dame otra" → ALTERNATIVE
-"Esa no" → ALTERNATIVE (rechaza película específica, pide otra)
+"Prefiero otra cosa" → ALTERNATIVE
+"Me gusta" → FEEDBACK_POS
 "Perfecto" → FEEDBACK_POS
 "Quiero ver comedia" → RECOMMEND
 
