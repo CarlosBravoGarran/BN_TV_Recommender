@@ -75,6 +75,7 @@ const TMDB_IMG = "https://image.tmdb.org/t/p/w200";
 
 // ── Enviar mensaje ──────────────────────────────────────────────
 async function sendMessage() {
+  try {
   const input = document.getElementById("userInput");
   const text  = input.value.trim();
   if (!text || isLoading) return;
@@ -95,6 +96,8 @@ async function sendMessage() {
     renderError("No se pudo conectar con el servidor. ¿Está corriendo el backend?");
     console.error(err);
   }
+  } catch(e) { console.error("ERROR EN sendMessage:", e); }
+
 }
 
 

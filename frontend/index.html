@@ -26,10 +26,10 @@
         <h2>Hola, ¿qué quieres ver hoy?</h2>
         <p>Cuéntame cómo te sientes, qué tipo de programa te apetece o simplemente pregúntame qué ponen. ¡Yo te ayudo a elegir!</p>
         <div class="quick-replies" style="justify-content:center; margin-top:8px;">
-          <button class="qr-btn" onclick="sendQuick('Recomiéndame algo para esta noche')">🌙 Esta noche</button>
-          <button class="qr-btn" onclick="sendQuick('Quiero ver una película de comedia')">😂 Comedia</button>
-          <button class="qr-btn" onclick="sendQuick('Algo para ver en familia')">👨‍👩‍👧 En familia</button>
-          <button class="qr-btn" onclick="sendQuick('Recomiéndame una serie')">📱 Serie</button>
+          <button class="qr-btn" type="button" onclick="sendQuick('Recomiéndame algo para esta noche')">🌙 Esta noche</button>
+          <button class="qr-btn" type="button" onclick="sendQuick('Quiero ver una película de comedia')">😂 Comedia</button>
+          <button class="qr-btn" type="button" onclick="sendQuick('Algo para ver en familia')">👨‍👩‍👧 En familia</button>
+          <button class="qr-btn" type="button" onclick="sendQuick('Recomiéndame una serie')">📱 Serie</button>
         </div>
       </div>
     </div>
@@ -47,7 +47,7 @@
         onkeydown="handleKey(event)"
         oninput="autoResize(this)"
       ></textarea>
-      <button id="sendBtn" onclick="sendMessage()">➤</button>
+      <button type="button" id="sendBtn" onclick="sendMessage()">➤</button>
     </div>
 
   </div>
@@ -102,6 +102,6 @@
 
 </main>
 
-<script src="app.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
