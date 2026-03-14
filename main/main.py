@@ -204,14 +204,24 @@ def main():
     # Initialize CPT counts
     cpt_counts = initialize_cpt_counts(model, virtual_sample_size=100)
 
-    # Load previous counts if they exist
+    from feedback import build_cpd_from_counts
     counts_path = Path(__file__).parent / "output/cpt_counts.json"
     if counts_path.exists():
         try:
             cpt_counts = load_cpt_counts(counts_path)
+            # Rebuild CPDs from loaded counts and apply to model
+            for var, cpt_info in cpt_counts.items():
+                new_cpd = build_cpd_from_counts(var, cpt_info)
+                existing = model.get_cpds(var)
+                if existing:
+                    model.remove_cpds(existing)
+                model.add_cpds(new_cpd)
             print("Loaded previous learning data\n")
         except Exception as e:
             print(f"Could not load previous counts: {e}\n")
+    else:
+        # First run: persist the initial counts so feedback can append from the start
+        save_cpt_counts(cpt_counts, counts_path)
 
     # Initialize TMDB content fetcher
     try:
@@ -282,6 +292,7 @@ def main():
             state["user_feedback"] = "rejected"
             # Apply feedback
             apply_feedback(model, cpt_counts, state, learning_rate=50)
+            save_cpt_counts(cpt_counts, counts_path)
             
             # Check if user is rejecting the entire genre
             from smart_alternative import should_skip_to_next_genre, get_next_different_genre
@@ -339,6 +350,7 @@ def main():
             state["user_feedback"] = "accepted"
             # Apply feedback
             apply_feedback(model, cpt_counts, state, learning_rate=50)
+            save_cpt_counts(cpt_counts, counts_path)
 
         elif intent == "FEEDBACK_NEG":
             state["user_feedback"] = "rejected"
@@ -361,6 +373,7 @@ def main():
             else:
                 # Regular negative feedback on specific content
                 apply_feedback(model, cpt_counts, state, learning_rate=50)
+            save_cpt_counts(cpt_counts, counts_path)
 
         elif intent in ("SMALLTALK", "OTHER"):
             pass

@@ -84,7 +84,7 @@ def build_cpd_from_counts(variable, cpt_info):
 # Apply feedback (ProgramType, ProgramGenre)
 # ============================================================================
 
-def apply_feedback(model, cpt_counts, state, learning_rate=50):
+def apply_feedback(model, cpt_counts, state, learning_rate=500):
     """
     Update CPDs based on user feedback for Type and Genre recommendations.
     
@@ -141,38 +141,39 @@ def update_program_type_cpd(model, cpt_counts, program_type, attrs, feedback, le
     """
     cpt = cpt_counts["ProgramType"]
     parents = cpt["parents"]
-    
-    # Build parent state tuple from available attributes
-    parent_state = build_parent_state(parents, attrs)
-    
-    if parent_state not in cpt["counts"]:
-        #print(f"Parent state {parent_state} not found in ProgramType CPD")
+
+    matching = get_matching_parent_states(parents, attrs, cpt["state_names"])
+    updated = False
+
+    for parent_state, weight in matching:
+        if parent_state not in cpt["counts"]:
+            continue
+
+        effective_lr = learning_rate * weight
+        updated = True
+
+        if feedback == "accepted":
+            cpt["counts"][parent_state][program_type] += effective_lr
+
+        elif feedback == "rejected":
+            current = cpt["counts"][parent_state][program_type]
+            penalty = min(effective_lr * 0.5, current * 0.2)
+            cpt["counts"][parent_state][program_type] = max(1, current - penalty)
+
+            all_types = cpt["state_names"]["ProgramType"]
+            alternatives = [t for t in all_types if t != program_type]
+            boost_per_alt = penalty / len(alternatives) if alternatives else 0
+            for alt in alternatives:
+                cpt["counts"][parent_state][alt] += boost_per_alt
+
+    if not updated:
+        print(f"[feedback] No matching parent states found for ProgramType with attrs={attrs}")
         return
-    
-    if feedback == "accepted":
-        # Reinforce the recommended type
-        cpt["counts"][parent_state][program_type] += learning_rate
-        #print(f"Reinforced {program_type} for context {parent_state}")
-    
-    elif feedback == "rejected":
-        # Penalize the recommended type (but don't go below a minimum)
-        current = cpt["counts"][parent_state][program_type]
-        penalty = min(learning_rate * 0.5, current * 0.2)
-        cpt["counts"][parent_state][program_type] = max(1, current - penalty)
-        
-        # Slightly boost alternatives
-        all_types = cpt["state_names"]["ProgramType"]
-        alternatives = [t for t in all_types if t != program_type]
-        boost_per_alt = penalty / len(alternatives) if alternatives else 0
-        
-        for alt in alternatives:
-            cpt["counts"][parent_state][alt] += boost_per_alt
-        
-        #print(f"Penalized {program_type}, boosted alternatives for context {parent_state}")
-    
-    # Rebuild and replace CPD
+
     new_cpd = build_cpd_from_counts("ProgramType", cpt)
-    model.remove_cpds("ProgramType")
+    existing = model.get_cpds("ProgramType")
+    if existing:
+        model.remove_cpds(existing)
     model.add_cpds(new_cpd)
 
 
@@ -183,55 +184,63 @@ def update_program_genre_cpd(model, cpt_counts, program_type, program_genre, att
     """
     cpt = cpt_counts["ProgramGenre"]
     parents = cpt["parents"]
-    
-    # Build parent state - must include ProgramType
+
+    # ProgramType is always known here
     attrs_with_type = dict(attrs)
     attrs_with_type["ProgramType"] = program_type
-    
-    parent_state = build_parent_state(parents, attrs_with_type)
-    
-    if parent_state not in cpt["counts"]:
-        #print(f"Parent state {parent_state} not found in ProgramGenre CPD")
+
+    matching = get_matching_parent_states(parents, attrs_with_type, cpt["state_names"])
+    updated = False
+
+    for parent_state, weight in matching:
+        if parent_state not in cpt["counts"]:
+            continue
+
+        effective_lr = learning_rate * weight
+        updated = True
+
+        if feedback == "accepted":
+            cpt["counts"][parent_state][program_genre] += effective_lr
+
+        elif feedback == "rejected":
+            current = cpt["counts"][parent_state][program_genre]
+            penalty = min(effective_lr * 0.5, current * 0.2)
+            cpt["counts"][parent_state][program_genre] = max(1, current - penalty)
+
+            all_genres = cpt["state_names"]["ProgramGenre"]
+            alternatives = [g for g in all_genres if g != program_genre]
+            boost_per_alt = penalty / len(alternatives) if alternatives else 0
+            for alt in alternatives:
+                cpt["counts"][parent_state][alt] += boost_per_alt
+
+    if not updated:
+        print(f"[feedback] No matching parent states found for ProgramGenre with attrs={attrs_with_type}")
         return
-    
-    if feedback == "accepted":
-        # Reinforce the recommended genre
-        cpt["counts"][parent_state][program_genre] += learning_rate
-        #print(f"Reinforced {program_genre} for Type={program_type}, context={parent_state}")
-    
-    elif feedback == "rejected":
-        # Penalize the recommended genre
-        current = cpt["counts"][parent_state][program_genre]
-        penalty = min(learning_rate * 0.5, current * 0.2)
-        cpt["counts"][parent_state][program_genre] = max(1, current - penalty)
-        
-        # Boost alternatives
-        all_genres = cpt["state_names"]["ProgramGenre"]
-        alternatives = [g for g in all_genres if g != program_genre]
-        boost_per_alt = penalty / len(alternatives) if alternatives else 0
-        
-        for alt in alternatives:
-            cpt["counts"][parent_state][alt] += boost_per_alt
-        
-        #print(f"Penalized {program_genre}, boosted alternatives for Type={program_type}")
-    
-    # Rebuild and replace CPD
+
     new_cpd = build_cpd_from_counts("ProgramGenre", cpt)
-    model.remove_cpds("ProgramGenre")
+    existing = model.get_cpds("ProgramGenre")
+    if existing:
+        model.remove_cpds(existing)
     model.add_cpds(new_cpd)
 
 
-def build_parent_state(parents, attrs):
+def get_matching_parent_states(parents, attrs, state_names):
     """
-    Build a parent state tuple from available attributes.
-    Uses None for missing parent values.
+    Returns a list of (parent_state_tuple, weight) for all combinations
+    that match the known attributes. Unknown parents expand to all their
+    possible states with equal weight (fractional update).
     """
-    parent_values = []
+    parent_options = []
     for p in parents:
         value = attrs.get(p)
-        parent_values.append(value if value not in (None, "", "null") else None)
-    
-    return tuple(parent_values)
+        if value not in (None, "", "null"):
+            parent_options.append([value])
+        else:
+            parent_options.append(state_names[p])
+
+    combinations = list(itertools.product(*parent_options))
+    weight = 1.0 / len(combinations)
+    return [(combo, weight) for combo in combinations]
 
 
 # ============================================================================

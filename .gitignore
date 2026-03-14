@@ -436,4 +436,5 @@ venv/
 !requirements.txt
 
 states.json
-main/output/*.json
+llm_eval_results.json
+cpt_counts.json
