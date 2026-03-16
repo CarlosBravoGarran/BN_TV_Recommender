@@ -11,7 +11,6 @@ from pathlib import Path
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
-# ── Importa todo lo que ya usa main.py ──────────────────────────
 from feedback import initialize_cpt_counts, apply_feedback, load_cpt_counts, save_cpt_counts
 from graph_builder import load_model
 from LLM_agent import (
@@ -26,14 +25,14 @@ from smart_alternative import should_skip_to_next_genre, get_next_different_genr
 from main import fetch_real_content, try_next_alternative
 
 # ════════════════════════════════════════════════════════════════
-# INICIALIZACIÓN (se ejecuta una sola vez al arrancar el servidor)
+# INICIALIZACIÓN
 # ════════════════════════════════════════════════════════════════
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path="")
 CORS(app)
 
-# Sirve el frontend en http://localhost:5000
+# Frontend en http://localhost:5000
 @app.route("/")
 def index():
     return send_from_directory(FRONTEND_DIR, "index.html")
@@ -62,7 +61,6 @@ except Exception as e:
 
 # ── Estado de sesión en memoria ──────────────────────────────────
 # Cada sesión de navegador comparte este estado.
-# Si necesitas multi-usuario, cámbialo a un dict keyed por session_id.
 session_state = {
     "atributes_bn":      {},
     "candidates":        {},
@@ -94,7 +92,7 @@ def chat():
     intent = classify_intent(mensaje)
     print(f"[intent] {intent}")
 
-    # ── 2. Lógica según intención (igual que main.py) ────────────
+    # ── 2. Lógica según intención ────────────
     if intent == "RECOMMEND":
         atributes = extract_attributes_llm(mensaje)
         time_of_day, day_type = get_time_daytype()
@@ -216,7 +214,7 @@ def chat():
     })
 
 
-# ── Endpoint para resetear la sesión (útil para pruebas) ────────
+# ── Endpoint para resetear la sesión────────
 @app.route("/api/reset", methods=["POST"])
 def reset():
     session_state.update({
