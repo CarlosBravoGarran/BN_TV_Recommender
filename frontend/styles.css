@@ -2,13 +2,13 @@
    VARIABLES
    ============================================================ */
 :root {
-  --bg:          #0f1117;
-  --surface:     #1a1d2e;
-  --surface2:    #232740;
+  --bg:          #9fb0e2;
+  --surface:     #808ccf;
+  --surface2:    #5d68aa;
   --accent:      #e8a045;
   --accent2:     #7c6af5;
   --text:        #f0eeff;
-  --muted:       #8b8fad;
+  --muted:       #1f2029;
   --bubble-user: #2d3155;
   --bubble-bot:  #1e2138;
   --border:      rgba(124, 106, 245, 0.18);

@@ -206,6 +206,16 @@ def chat():
     last_rec = session_state.get("last_recommendation") or {}
     content  = last_rec.get("content")  # objeto TMDB completo o None
 
+    # Si el LLM devolvió un content_id, buscar el contenido correspondiente
+    content_id   = response.get("content_id")
+    real_content = session_state.get("real_content", [])
+    if content_id and real_content:
+        matching = next((c for c in real_content if c.get("id") == content_id), None)
+        if matching:
+            content = matching
+            if session_state.get("last_recommendation") is not None:
+                session_state["last_recommendation"]["content"] = matching
+
     return jsonify({
         "message": response.get("message", ""),
         "action":  response.get("action",  "SMALLTALK"),
