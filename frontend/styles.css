@@ -172,9 +172,9 @@ main {
 
 /* ── Error ── */
 .error-bubble .bubble {
-  background: rgba(239, 68, 68, 0.12);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.682);
+  border-color: rgba(238, 59, 59, 0.84);
+  color: #160909;
 }
 
 /* ============================================================
