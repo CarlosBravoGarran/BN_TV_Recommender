@@ -1,8 +1,6 @@
 /* ================================================================
-   🔌  INTEGRACIÓN CON EL BACKEND  — solo tienes que tocar aquí
+   🔌  INTEGRACIÓN CON EL BACKEND
    ================================================================
-
-   Cambia API_URL a la dirección de tu servidor Flask.
 
    Tu endpoint debe aceptar:
      POST /api/chat
@@ -43,7 +41,7 @@
 
    ================================================================ */
 
-const API_URL = "http://localhost:5000/api/chat";  // ← CAMBIA ESTO
+const API_URL = "http://localhost:5000/api/chat";
 
 async function callBackend(userMessage) {
   const res = await fetch(API_URL, {
@@ -57,7 +55,7 @@ async function callBackend(userMessage) {
     throw new Error(err.error || `HTTP ${res.status}`);
   }
 
-  return res.json(); // devuelve el objeto ya parseado
+  return res.json(); 
 }
 
 /* ================================================================

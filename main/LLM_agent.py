@@ -15,11 +15,21 @@ from bn_recommender import recommend_gender, recommend_type
 # Load environment
 load_dotenv()
 
+# --- OpenAI (commented out) ---
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise RuntimeError("OPENAI_API_KEY not defined in .env file")
-
 client = OpenAI(api_key=api_key)
+
+# --- MasOrange API ---
+# api_key = os.getenv("MO_API_KEY")
+# if not api_key:
+#     raise RuntimeError("MO_API_KEY not defined in .env file")
+
+# client = OpenAI(
+#     api_key=api_key,
+#     base_url="https://llm.tools.cloud.masorange.es",
+# )
 
 # ANSI colors
 COLOR_RESET = "\033[0m"
@@ -229,7 +239,8 @@ def classify_intent(user_message: str) -> str:
         Intent string: RECOMMEND, ALTERNATIVE, FEEDBACK_POS, FEEDBACK_NEG, SMALLTALK, OTHER
     """
     resp = client.chat.completions.create(
-        model="gpt-4o",
+        #model="gpt-4o",
+        model="gemini-2.5-pro",
         messages=[
             {"role": "system", "content": INTENT_PROMPT},
             {"role": "user", "content": user_message}
@@ -257,7 +268,8 @@ def extract_attributes_llm(user_message: str) -> dict:
         Dictionary with BN attribute names and values
     """
     response = client.chat.completions.create(
-        model="gpt-4o",
+         model="gpt-4o",
+        #model="gemini-2.5-pro",
         messages=[
             {"role": "system", "content": EXTRACTION_PROMPT},
             {"role": "user", "content": user_message}
@@ -299,10 +311,11 @@ def converse(user_message: str, state: dict, history: list = None) -> str:
     messages.append({"role": "user", "content": user_message})
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        # model="gpt-4o",
+        model="gemini-2.5-pro",
         messages=messages,
         temperature=0.3,  # Lower temperature for more consistent JSON
-        response_format={"type": "json_object"}  # Force JSON mode
+        # response_format={"type": "json_object"}  # Not supported by Gemini via proxy
     )
 
     return response.choices[0].message.content
