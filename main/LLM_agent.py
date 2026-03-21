@@ -239,8 +239,8 @@ def classify_intent(user_message: str) -> str:
         Intent string: RECOMMEND, ALTERNATIVE, FEEDBACK_POS, FEEDBACK_NEG, SMALLTALK, OTHER
     """
     resp = client.chat.completions.create(
-        #model="gpt-4o",
-        model="gemini-2.5-pro",
+        model="gpt-4o",
+        #model="gemini-2.5-pro",
         messages=[
             {"role": "system", "content": INTENT_PROMPT},
             {"role": "user", "content": user_message}
@@ -268,8 +268,8 @@ def extract_attributes_llm(user_message: str) -> dict:
         Dictionary with BN attribute names and values
     """
     response = client.chat.completions.create(
-         model="gpt-4o",
-        #model="gemini-2.5-pro",
+        model="gpt-4o",
+        #model="claude-sonnet-4-5",
         messages=[
             {"role": "system", "content": EXTRACTION_PROMPT},
             {"role": "user", "content": user_message}
@@ -311,8 +311,8 @@ def converse(user_message: str, state: dict, history: list = None) -> str:
     messages.append({"role": "user", "content": user_message})
 
     response = client.chat.completions.create(
-        # model="gpt-4o",
-        model="gemini-2.5-pro",
+        model="gpt-4o",
+        #model="claude-sonnet-4-5",
         messages=messages,
         temperature=0.3,  # Lower temperature for more consistent JSON
         # response_format={"type": "json_object"}  # Not supported by Gemini via proxy
