@@ -15,7 +15,7 @@ from bn_recommender import recommend_gender, recommend_type
 # Load environment
 load_dotenv()
 
-# --- OpenAI (commented out) ---
+# --- OpenAI ---
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise RuntimeError("OPENAI_API_KEY not defined in .env file")

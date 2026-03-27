@@ -35,13 +35,12 @@ def viewing_to_feedback(percent_watched, times_watched=1, duration_minutes=None)
                           takes priority over percent_watched.
 
     Returns:
-        dict with keys 'user_feedback' and 'learning_rate', or None when no
-        feedback should be applied (50-70 % range).
+        dict with keys 'user_feedback' and 'learning_rate'
     """
     # Short-watch guard: < 5 minutes absolute → strong rejection
     if duration_minutes is not None:
         actual_minutes = (percent_watched / 100.0) * duration_minutes
-        if actual_minutes < 5:
+        if actual_minutes < 10:
             lr = 100 * times_watched
             return {"user_feedback": "rejected", "learning_rate": lr}
 
@@ -54,12 +53,8 @@ def viewing_to_feedback(percent_watched, times_watched=1, duration_minutes=None)
         lr = 25 * times_watched
         return {"user_feedback": "accepted", "learning_rate": lr}
 
-    if percent_watched >= 50:
-        # Neutral zone — no feedback
-        return None
-
-    # < 50 %
-    lr = 50 * times_watched
+    # < 70 %
+    lr = 70 * times_watched
     return {"user_feedback": "rejected", "learning_rate": lr}
 
 
@@ -311,8 +306,8 @@ if __name__ == "__main__":
     print_cpd_diff(before_3, cpt_counts, "ProgramGenre")
 
     # -----------------------------------------------------------------------
-    # Example 4 – Short watch < 5 min: strong rejection despite high percent
-    #   (watched 80% of a 4-minute clip → only 3.2 min → < 5 min rule fires)
+    # Example 4 – Short watch < 10 min: strong rejection despite high percent
+    #   (watched 80% of a 4-minute clip → only 3.2 min → < 10 min rule fires)
     # -----------------------------------------------------------------------
     before_4 = snapshot_counts(cpt_counts)
 
@@ -320,8 +315,8 @@ if __name__ == "__main__":
         model, cpt_counts,
         program_type="documentary",
         program_genre="documentary",
-        percent_watched=80,
-        duration_minutes=4,
+        percent_watched=10,
+        duration_minutes=90,
     )
 
     print_cpd_diff(before_4, cpt_counts, "ProgramType")
