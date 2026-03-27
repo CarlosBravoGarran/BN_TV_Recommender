@@ -41,13 +41,146 @@
 
    ================================================================ */
 
-const API_URL = "http://localhost:5000/api/chat";
+const API_URL     = "http://localhost:5000/api/chat";
+const PROFILE_URL = "http://localhost:5000/api/profile";
+
+// ── Perfil de usuario ───────────────────────────────────────────
+let currentUserId  = null;
+let currentProfile = null;
+
+async function initProfile() {
+  currentUserId = localStorage.getItem("tv_user_id");
+
+  if (!currentUserId) {
+    showProfileModal();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${PROFILE_URL}/${currentUserId}`);
+    if (res.ok) {
+      currentProfile = await res.json();
+      _applyProfileToUI();
+    } else {
+      showProfileModal();
+    }
+  } catch {
+    // Backend aún no disponible — continuar sin perfil
+  }
+}
+
+function showProfileModal() {
+  const modal    = document.getElementById("profileModal");
+  const closeBtn = document.getElementById("profileClose");
+
+  // Mostrar X solo si ya hay perfil (edición)
+  closeBtn.style.display = currentProfile ? "flex" : "none";
+
+  // Pre-rellenar si estamos editando
+  if (currentProfile) {
+    document.getElementById("profileName").value = currentProfile.name || "";
+    _setActive("ageGroup",       currentProfile.age);
+    _setActive("genderGroup",    currentProfile.gender);
+    _setActive("householdGroup", currentProfile.household);
+  }
+
+  modal.classList.add("show");
+}
+
+function hideProfileModal() {
+  document.getElementById("profileModal").classList.remove("show");
+}
+
+function skipProfile() {
+  // Generar un user_id anónimo para que no vuelva a salir el modal
+  if (!currentUserId) {
+    currentUserId = crypto.randomUUID();
+    localStorage.setItem("tv_user_id", currentUserId);
+  }
+  hideProfileModal();
+}
+
+function onModalOverlayClick(e) {
+  if (e.target === document.getElementById("profileModal") && currentProfile) {
+    hideProfileModal();
+  }
+}
+
+async function saveProfile() {
+  const name      = document.getElementById("profileName").value.trim();
+  const age       = document.querySelector("#ageGroup .sel-btn.active")?.dataset.val || null;
+  const gender    = document.querySelector("#genderGroup .sel-btn.active")?.dataset.val || null;
+  const household = document.querySelector("#householdGroup .sel-btn.active")?.dataset.val || null;
+
+  if (!name) {
+    const inp = document.getElementById("profileName");
+    inp.classList.add("shake");
+    setTimeout(() => inp.classList.remove("shake"), 500);
+    inp.focus();
+    return;
+  }
+
+  if (!currentUserId) {
+    currentUserId = crypto.randomUUID();
+    localStorage.setItem("tv_user_id", currentUserId);
+  }
+
+  const profile = { user_id: currentUserId, name, age, gender, household };
+
+  try {
+    await fetch(PROFILE_URL, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(profile),
+    });
+  } catch (e) {
+    console.warn("No se pudo guardar el perfil en el servidor:", e);
+  }
+
+  currentProfile = profile;
+  _applyProfileToUI();
+  hideProfileModal();
+}
+
+function _applyProfileToUI() {
+  const badge = document.getElementById("profileBadge");
+  const name  = document.getElementById("profileBadgeName");
+
+  if (currentProfile?.name) {
+    name.textContent  = currentProfile.name;
+    badge.style.display = "flex";
+
+    const h2 = document.querySelector("#welcomeScreen h2");
+    if (h2) h2.textContent = `Hola ${currentProfile.name}, ¿qué quieres ver hoy?`;
+  }
+}
+
+function _setActive(groupId, value) {
+  document.querySelectorAll(`#${groupId} .sel-btn`).forEach(b => {
+    b.classList.toggle("active", b.dataset.val === value);
+  });
+}
+
+// Delegación de eventos para los grupos de selección
+document.querySelectorAll(".select-group").forEach(group => {
+  group.addEventListener("click", e => {
+    const btn = e.target.closest(".sel-btn");
+    if (!btn) return;
+    group.querySelectorAll(".sel-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+  });
+});
+
+// ── Fin gestión de perfil ───────────────────────────────────────
 
 async function callBackend(userMessage) {
+  const body = { message: userMessage };
+  if (currentUserId) body.user_id = currentUserId;
+
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: userMessage }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
@@ -241,5 +374,6 @@ function esc(str) {
     .replace(/"/g, "&quot;");
 }
 
-// Foco inicial
+// Inicializar perfil y dar foco al input
+initProfile();
 document.getElementById("userInput").focus();

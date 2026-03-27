@@ -64,15 +64,37 @@ header {
   font-weight: 600;
 }
 
+.header-spacer { flex: 1; }
+
 .status-dot {
   width: 10px;
   height: 10px;
   background: #4ade80;
   border-radius: 50%;
-  margin-left: auto;
   box-shadow: 0 0 8px #4ade80;
   animation: pulse 2s infinite;
 }
+
+.profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  margin-right: 12px;
+}
+
+.profile-badge:hover { border-color: var(--accent); background: rgba(232, 160, 69, 0.1); }
+
+.profile-edit-icon { font-size: 0.75rem; opacity: 0.65; }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
@@ -438,6 +460,167 @@ main {
   line-height: 1.6;
   max-width: 380px;
 }
+
+/* ============================================================
+   MODAL DE PERFIL
+   ============================================================ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 12, 25, 0.78);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal-card {
+  background: var(--bubble-bot);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  width: min(460px, 92vw);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: slideIn 0.28s ease;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.45rem;
+  color: var(--accent);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.2s;
+}
+.modal-close:hover { color: var(--text); }
+
+.modal-subtitle {
+  font-size: 0.92rem;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-top: -4px;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.profile-form label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: rgba(240, 238, 255, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-top: 6px;
+}
+
+.profile-form input {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.profile-form input::placeholder { color: var(--muted); }
+.profile-form input:focus { border-color: var(--accent2); }
+
+.profile-form input.shake {
+  animation: shake 0.4s ease;
+  border-color: #ef4444;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  60%       { transform: translateX(6px); }
+  80%       { transform: translateX(-3px); }
+}
+
+.select-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sel-btn {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  border-radius: 100px;
+  padding: 8px 18px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sel-btn:hover    { border-color: var(--accent2); }
+.sel-btn.active   { background: var(--accent2); border-color: var(--accent2); color: white; }
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  gap: 12px;
+}
+
+.modal-skip {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.modal-skip:hover { color: var(--text); }
+
+.modal-save {
+  background: linear-gradient(135deg, var(--accent), #c17a1e);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.modal-save:hover { transform: scale(1.03); box-shadow: 0 4px 20px rgba(232, 160, 69, 0.4); }
+.modal-save:active { transform: scale(0.97); }
 
 /* ============================================================
    RESPONSIVE

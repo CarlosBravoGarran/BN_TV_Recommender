@@ -11,8 +11,55 @@
 
 <header>
   <div class="logo">¿Qué vemos? 📺</div>
+  <div class="header-spacer"></div>
+  <button id="profileBadge" class="profile-badge" onclick="showProfileModal()" style="display:none" type="button">
+    <span class="profile-badge-icon">👤</span>
+    <span id="profileBadgeName"></span>
+    <span class="profile-edit-icon">✏️</span>
+  </button>
   <div class="status-dot"></div>
 </header>
+
+<!-- Modal de perfil -->
+<div id="profileModal" class="modal-overlay" onclick="onModalOverlayClick(event)">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">👤 Cuéntame sobre ti</div>
+      <button id="profileClose" class="modal-close" onclick="hideProfileModal()" type="button" style="display:none">✕</button>
+    </div>
+    <p class="modal-subtitle">Solo una vez — así podré recomendarte mejor sin que tengas que repetirlo cada vez</p>
+
+    <div class="profile-form">
+      <label for="profileName">¿Cómo te llamo?</label>
+      <input type="text" id="profileName" placeholder="Tu nombre" maxlength="30" autocomplete="given-name">
+
+      <label>Edad</label>
+      <div class="select-group" id="ageGroup">
+        <button class="sel-btn" data-val="young" type="button">18–35</button>
+        <button class="sel-btn" data-val="adult" type="button">36–55</button>
+        <button class="sel-btn" data-val="senior" type="button">56+</button>
+      </div>
+
+      <label>Género</label>
+      <div class="select-group" id="genderGroup">
+        <button class="sel-btn" data-val="male" type="button">Hombre</button>
+        <button class="sel-btn" data-val="female" type="button">Mujer</button>
+      </div>
+
+      <label>¿Con quién ves la tele normalmente?</label>
+      <div class="select-group" id="householdGroup">
+        <button class="sel-btn" data-val="single" type="button">Solo/a</button>
+        <button class="sel-btn" data-val="couple" type="button">En pareja</button>
+        <button class="sel-btn" data-val="family" type="button">En familia</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-skip" id="profileSkip" onclick="skipProfile()" type="button">Saltar por ahora</button>
+      <button class="modal-save" onclick="saveProfile()" type="button">Guardar ➤</button>
+    </div>
+  </div>
+</div>
 
 <main>
 

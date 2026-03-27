@@ -28,14 +28,59 @@ from main import fetch_real_content, try_next_alternative
 # INICIALIZACIÓN
 # ════════════════════════════════════════════════════════════════
 
-FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
+FRONTEND_DIR  = Path(__file__).parent.parent / "frontend"
+PROFILES_PATH = Path(__file__).parent / "output/user_profiles.json"
+
 app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path="")
 CORS(app)
+
+
+# ── Helpers de perfil ────────────────────────────────────────────
+
+def _load_profiles() -> dict:
+    if PROFILES_PATH.exists():
+        try:
+            return json.loads(PROFILES_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {}
+
+def _save_profile_data(profiles: dict):
+    PROFILES_PATH.write_text(
+        json.dumps(profiles, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
 # Frontend en http://localhost:5000
 @app.route("/")
 def index():
     return send_from_directory(FRONTEND_DIR, "index.html")
+
+
+# ── Perfil de usuario ────────────────────────────────────────────
+
+@app.route("/api/profile/<user_id>", methods=["GET"])
+def get_profile(user_id):
+    profile = _load_profiles().get(user_id)
+    if not profile:
+        return jsonify({"error": "not found"}), 404
+    return jsonify(profile)
+
+@app.route("/api/profile", methods=["POST"])
+def save_profile():
+    data    = request.get_json(silent=True) or {}
+    user_id = data.get("user_id", "").strip()
+    if not user_id:
+        return jsonify({"error": "user_id requerido"}), 400
+    profile = {
+        "name":      data.get("name", "").strip(),
+        "age":       data.get("age", ""),
+        "gender":    data.get("gender", ""),
+        "household": data.get("household", ""),
+    }
+    profiles = _load_profiles()
+    profiles[user_id] = profile
+    _save_profile_data(profiles)
+    return jsonify({"ok": True, "profile": profile})
 
 # Modelo Bayesiano
 MODEL_PATH  = Path(__file__).parent / "output/model.pkl"
@@ -84,6 +129,7 @@ conversation_history = []
 def chat():
     data    = request.get_json(silent=True) or {}
     mensaje = data.get("message", "").strip()
+    user_id = data.get("user_id", "").strip()
 
     if not mensaje:
         return jsonify({"error": "Campo 'message' vacío"}), 400
@@ -95,6 +141,16 @@ def chat():
     # ── 2. Lógica según intención ────────────
     if intent == "RECOMMEND":
         atributes = extract_attributes_llm(mensaje)
+
+        # Completar con el perfil guardado cuando el LLM no detectó el dato
+        if user_id:
+            saved = _load_profiles().get(user_id, {})
+            if not atributes.get("UserAge")       and saved.get("age"):
+                atributes["UserAge"]       = saved["age"]
+            if not atributes.get("UserGender")    and saved.get("gender"):
+                atributes["UserGender"]    = saved["gender"]
+            if not atributes.get("HouseholdType") and saved.get("household"):
+                atributes["HouseholdType"] = saved["household"]
         time_of_day, day_type = get_time_daytype()
         atributes["TimeOfDay"] = time_of_day
         atributes["DayType"]   = day_type
