@@ -107,6 +107,7 @@ df = pd.DataFrame({
     'Recomendado': recom
 })
 
-df.to_csv("eleven_nodes/tv_bn_dataset.csv", index=False)
+df.to_csv("c" \
+"tv_bn_dataset.csv", index=False)
 print("✅ Dataset generado con éxito")
 print(df.head())
