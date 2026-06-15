@@ -438,5 +438,4 @@ venv/
 states.json
 llm_eval_results.json
 cpt_counts.json
-**output/
 test_classifier/
