@@ -119,7 +119,7 @@ class TMDBContentFetcher:
         media_type: str,
         genre_id: Optional[int] = None,
         limit: int = 10,
-        language: str = "es-ES"
+        language: str = "en-EN"
     ) -> List[Dict]:
         """
         Discover content using TMDB discover endpoint
@@ -139,8 +139,8 @@ class TMDBContentFetcher:
         # For TV shows, prefer currently airing or recent
         if media_type == "tv":
             # Get date 2 years ago
-            two_years_ago = (datetime.now() - timedelta(days=730)).strftime("%Y-%m-%d")
-            params["first_air_date.gte"] = two_years_ago
+            ten_years_ago = (datetime.now() - timedelta(days=1700)).strftime("%Y-%m-%d")
+            params["first_air_date.gte"] = ten_years_ago
         
         try:
             data = self._get(endpoint, **params)

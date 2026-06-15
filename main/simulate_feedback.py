@@ -16,7 +16,7 @@ import os
 sys.path.insert(0, os.path.dirname(__file__))
 
 import feedback as fb
-import graph_builder
+import main.bn_builder as bn_builder
 
 
 # ============================================================================
@@ -246,7 +246,7 @@ if __name__ == "__main__":
     MODEL_PATH = os.path.join(os.path.dirname(__file__), "output", "model.pkl")
 
     print("Loading model ...")
-    model = graph_builder.load_model(MODEL_PATH)
+    model = bn_builder.load_model(MODEL_PATH)
 
     print("Initialising CPT counts ...")
     cpt_counts = fb.initialize_cpt_counts(model)

@@ -1,5 +1,5 @@
 """
-graph_builder.py
+bn_builder.py
 
 Utilities to build a Bayesian Network (structure + CPDs) from a CSV dataset
 (ConsumersProfile) using Hill Climbing and BDeu.
@@ -109,9 +109,9 @@ def learn_structure(df: pd.DataFrame, equivalent_sample_size: int = 100):
 
 def build_and_fit_model(
     csv_path: str = "main/consumers_profile.csv",
-    save_edges_path: str = "main/outputs/model_edges.csv",
-    save_model_path: str = "main/outputs/model.pkl",
-    save_cpds_path: str = "main/outputs/model_cpds.txt",
+    save_edges_path: str = "main/output/model_edges.csv",
+    save_model_path: str = "main/output/model.pkl",
+    save_cpds_path: str = "main/output/model_cpds.txt",
     prior_type: str = "BDeu",
     equivalent_sample_size: int = 100,
     visualize: bool = False,

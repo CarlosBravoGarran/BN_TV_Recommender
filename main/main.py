@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from feedback import initialize_cpt_counts, apply_feedback, load_cpt_counts, save_cpt_counts
-from graph_builder import load_model
+from main.bn_builder import load_model
 from LLM_agent import (
     ACTION_COLORS,
     INTENT_COLORS,

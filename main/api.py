@@ -12,7 +12,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 from feedback import initialize_cpt_counts, apply_feedback, load_cpt_counts, save_cpt_counts
-from graph_builder import load_model
+from main.bn_builder import load_model
 from LLM_agent import (
     classify_intent,
     converse,
