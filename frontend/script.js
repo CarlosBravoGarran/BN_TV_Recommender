@@ -127,6 +127,10 @@ async function saveProfile() {
 
   const profile = { user_id: currentUserId, name, age, gender, household };
 
+  currentProfile = profile;
+  _applyProfileToUI();
+  hideProfileModal();
+
   try {
     await fetch(PROFILE_URL, {
       method:  "POST",
@@ -136,10 +140,6 @@ async function saveProfile() {
   } catch (e) {
     console.warn("No se pudo guardar el perfil en el servidor:", e);
   }
-
-  currentProfile = profile;
-  _applyProfileToUI();
-  hideProfileModal();
 }
 
 function _applyProfileToUI() {
